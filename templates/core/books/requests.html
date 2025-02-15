@@ -1,0 +1,89 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Book Requests - Book Friend{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Book Requests</h1>
+
+    <!-- Active Borrows -->
+    <h2 class="mb-3">Active Borrows</h2>
+    {% if active_borrows %}
+        <div class="list-group mb-4">
+            {% for borrow in active_borrows %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">{{ borrow.book.title }}</h5>
+                            {% if borrow.borrower == request.user %}
+                                <p class="mb-1">Borrowed from: {{ borrow.book.owner.get_full_name }}</p>
+                            {% else %}
+                                <p class="mb-1">Borrowed by: {{ borrow.borrower.get_full_name }}</p>
+                            {% endif %}
+                            <small class="text-muted">Return date: {{ borrow.return_date }}</small>
+                        </div>
+                        <form method="post" action="{% url 'core:book_return' borrow.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm">Mark as Returned</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted mb-4">No active borrows.</p>
+    {% endif %}
+
+    <!-- Received Requests -->
+    <h2 class="mb-3">Received Requests</h2>
+    {% if received_requests %}
+        <div class="list-group mb-4">
+            {% for request in received_requests %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">{{ request.book.title }}</h5>
+                            <p class="mb-1">Requested by: {{ request.borrower.get_full_name }}</p>
+                            <small class="text-muted">Return by: {{ request.return_date }}</small>
+                        </div>
+                        <div class="btn-group">
+                            <form method="post" action="{% url 'core:book_request_accept' request.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                            </form>
+                            <form method="post" action="{% url 'core:book_request_decline' request.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted mb-4">No pending requests received.</p>
+    {% endif %}
+
+    <!-- Sent Requests -->
+    <h2 class="mb-3">Sent Requests</h2>
+    {% if sent_requests %}
+        <div class="list-group">
+            {% for request in sent_requests %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">{{ request.book.title }}</h5>
+                            <p class="mb-1">Owner: {{ request.book.owner.get_full_name }}</p>
+                            <small class="text-muted">Return by: {{ request.return_date }}</small>
+                        </div>
+                        <span class="badge bg-secondary">Pending</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">No pending requests sent.</p>
+    {% endif %}
+</div>
+{% endblock %} 

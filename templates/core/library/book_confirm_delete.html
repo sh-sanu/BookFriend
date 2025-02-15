@@ -1,0 +1,21 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Delete Book - Book Friend{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Delete Book</h2>
+                <p class="text-center">Are you sure you want to delete "{{ book.title }}"?</p>
+                <form method="post" class="text-center">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <a href="{% url 'core:library' username=user.username %}" class="btn btn-outline-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

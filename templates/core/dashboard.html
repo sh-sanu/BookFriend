@@ -1,0 +1,82 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Book Friend{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Friend Requests</h5>
+                    {% if friend_requests %}
+                        <p class="card-text">You have {{ friend_requests }} pending friend request{{ friend_requests|pluralize }}</p>
+                        <a href="{% url 'core:friend_requests' %}" class="btn btn-primary">View Requests</a>
+                    {% else %}
+                        <p class="card-text">No pending friend requests</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Book Requests</h5>
+                    {% if book_requests %}
+                        <p class="card-text">You have {{ book_requests }} pending book request{{ book_requests|pluralize }}</p>
+                        <a href="{% url 'core:book_requests' %}" class="btn btn-primary">View Requests</a>
+                    {% else %}
+                        <p class="card-text">No pending book requests</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'core:book_add' %}" class="btn btn-primary">Add Book</a>
+                        <a href="{% url 'core:search' %}" class="btn btn-outline-primary">Find Friends</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="mb-3">Books from Friends</h2>
+    {% if friend_books %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for book in friend_books %}
+                <div class="col">
+                    <div class="card h-100">
+                        {% if book.cover_image %}
+                            <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}">
+                        {% else %}
+                            <img src="{% static 'core/images/default-book-cover.png' %}" class="card-img-top" alt="Default Cover">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ book.title }}</h5>
+                            <p class="card-text">
+                                <strong>Author:</strong> {{ book.author }}<br>
+                                <strong>Genre:</strong> {{ book.genre }}<br>
+                                <strong>Owner:</strong> {{ book.owner.get_full_name }}
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm">Request Book</a>
+                            <a href="{% url 'core:library' username=book.owner.username %}" class="btn btn-outline-secondary btn-sm">View Library</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center">
+            <p class="lead">No books from friends yet.</p>
+            <a href="{% url 'core:search' %}" class="btn btn-primary">Find Friends</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

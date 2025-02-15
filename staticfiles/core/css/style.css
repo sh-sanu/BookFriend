@@ -1,0 +1,67 @@
+/* General Styles */
+body {
+    background-color: #f8f9fa;
+}
+
+/* Card Styles */
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: none;
+}
+
+/* Profile Picture */
+.profile-picture {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Form Styles */
+.form-control:focus {
+    border-color: #6c757d;
+    box-shadow: 0 0 0 0.2rem rgba(108,117,125,.25);
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Book Card Styles */
+.book-card {
+    transition: transform 0.2s;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+}
+
+.book-cover {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Library Grid */
+.library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Book Form */
+.book-form-image-preview {
+    max-width: 200px;
+    margin-top: 10px;
+}
+
+/* Add your custom styles here */
+.notification-badge {
+    font-size: 0.7rem;
+} 

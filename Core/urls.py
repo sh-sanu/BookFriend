@@ -1,5 +1,51 @@
 from django.urls import path
 from . import views
+
+app_name = "core"
+
 urlpatterns = [
-    
+    # Authentication
+    path("", views.landing_page, name="landing"),
+    path("login/", views.login_view, name="login"),
+    path("signup/", views.signup_view, name="signup"),
+    path("logout/", views.logout_view, name="logout"),
+    # Profile
+    path("profile/edit/", views.profile_edit, name="profile_edit"),
+    path("profile/<str:username>/", views.profile_view, name="profile"),
+    # Dashboard
+    path("dashboard/", views.dashboard, name="dashboard"),
+    # Library
+    path("library/<str:username>/", views.library_view, name="library"),
+    path("books/add/", views.book_add, name="book_add"),
+    path("books/<int:book_id>/edit/", views.book_edit, name="book_edit"),
+    path("books/<int:book_id>/delete/", views.book_delete, name="book_delete"),
+    # Search
+    path("search/", views.search, name="search"),
+    # Friends
+    path("friends/", views.friends_list, name="friends_list"),
+    path("friends/requests/", views.friend_requests, name="friend_requests"),
+    path("friends/add/<str:username>/", views.friend_add, name="friend_add"),
+    path("friends/accept/<int:request_id>/", views.friend_accept, name="friend_accept"),
+    path(
+        "friends/decline/<int:request_id>/", views.friend_decline, name="friend_decline"
+    ),
+    # Book Requests
+    path("books/requests/", views.book_requests, name="book_requests"),
+    path("books/<int:book_id>/request/", views.book_request, name="book_request"),
+    path(
+        "books/requests/<int:request_id>/accept/",
+        views.book_request_accept,
+        name="book_request_accept",
+    ),
+    path(
+        "books/requests/<int:request_id>/decline/",
+        views.book_request_decline,
+        name="book_request_decline",
+    ),
+    path(
+        "books/requests/<int:request_id>/return/", views.book_return, name="book_return"
+    ),
+    # Notifications
+    path("notifications/", views.notifications_view, name="notifications"),
+    path("notifications/api/", views.notifications_api, name="notifications_api"),
 ]
