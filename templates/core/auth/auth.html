@@ -1,0 +1,94 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Welcome to Book Friend{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Logo and Name -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 text-primary">Book Friend</h1>
+        <p class="lead">Share your books with friends and discover new reads!</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <!-- Login Card -->
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg p-4">
+                <h2 class="text-center mb-4">Login</h2>
+                <form method="post" action="{% url 'core:login' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="login-username" class="form-label">Username or Email</label>
+                        <input type="text" name="username" id="login-username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="login-password" class="form-label">Password</label>
+                        <input type="password" name="password" id="login-password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Signup Card -->
+        <div class="col-md-5">
+            <div class="card shadow-lg p-4">
+                <h2 class="text-center mb-4">Create Account</h2>
+                <form method="post" action="{% url 'core:signup' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="signup-username" class="form-label">Username</label>
+                        <input type="text" name="username" id="signup-username" class="form-control" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="signup-firstname" class="form-label">First Name</label>
+                            <input type="text" name="first_name" id="signup-firstname" class="form-control" required>
+                        </div>
+                        <div class="col">
+                            <label for="signup-lastname" class="form-label">Last Name</label>
+                            <input type="text" name="last_name" id="signup-lastname" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signup-email" class="form-label">Email</label>
+                        <input type="email" name="email" id="signup-email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signup-password1" class="form-label">Password</label>
+                        <input type="password" name="password1" id="signup-password1" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signup-password2" class="form-label">Confirm Password</label>
+                        <input type="password" name="password2" id="signup-password2" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="terms_accepted" class="form-check-input" id="terms_accepted" required>
+                            <label class="form-check-label" for="terms_accepted">
+                                I accept the terms and conditions
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .card {
+        border-radius: 15px;
+    }
+    .btn-primary {
+        padding: 10px 20px;
+    }
+</style>
+{% endblock %}
+
+{% block navbar %}{% endblock %}

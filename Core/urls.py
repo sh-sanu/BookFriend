@@ -29,6 +29,7 @@ urlpatterns = [
     path(
         "friends/decline/<int:request_id>/", views.friend_decline, name="friend_decline"
     ),
+    path("friends/remove/<str:username>/", views.friend_remove, name="friend_remove"),
     # Book Requests
     path("books/requests/", views.book_requests, name="book_requests"),
     path("books/<int:book_id>/request/", views.book_request, name="book_request"),
