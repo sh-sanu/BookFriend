@@ -233,7 +233,9 @@ def friend_add(request, username):
         Notification.objects.create(
             user=receiver,
             notification_type="friend_request",
-            message=f"{request.user.username} sent you a friend request.",
+            message=f"{request.user.username} has sent you a friend request.",
+            related_user=request.user,
+            related_friendship=friendship
         )
 
         messages.success(request, "Friend request sent successfully!")
@@ -257,6 +259,8 @@ def friend_accept(request, request_id):
             user=friendship.sender,
             notification_type="request_update",
             message=f"{request.user.username} accepted your friend request.",
+            related_user=request.user,
+            related_friendship=friendship
         )
 
         messages.success(request, "Friend request accepted!")
@@ -280,6 +284,8 @@ def friend_decline(request, request_id):
             user=friendship.sender,
             notification_type="request_update",
             message=f"{request.user.username} declined your friend request.",
+            related_user=request.user,
+            related_friendship=friendship
         )
 
         messages.success(request, "Friend request declined.")
@@ -322,7 +328,10 @@ def book_request(request, book_id):
             Notification.objects.create(
                 user=book.owner,
                 notification_type="book_request",
-                message=f'{request.user.username} requested to borrow "{book.title}".',
+                message=f"{request.user.username} has requested to borrow '{book.title}'.",
+                related_user=request.user,
+                related_book=book,
+                related_book_request=book_request
             )
 
             messages.success(request, "Book request sent successfully!")
@@ -342,19 +351,27 @@ def book_requests(request):
         book__owner=request.user, status="pending"
     ).select_related("book", "borrower")
 
-    # Get sent requests (as borrower)
-    sent_requests = BookRequest.objects.filter(borrower=request.user).select_related(
-        "book", "book__owner"
-    )
+    # Get sent requests (as borrower) - split by status
+    sent_pending_requests = BookRequest.objects.filter(
+        borrower=request.user,
+        status="pending"
+    ).select_related("book", "book__owner")
+
+    sent_returned_requests = BookRequest.objects.filter(
+        borrower=request.user,
+        status="returned"
+    ).select_related("book", "book__owner")
 
     # Get active borrows (both as owner and borrower)
     active_borrows = BookRequest.objects.filter(
-        (Q(book__owner=request.user) | Q(borrower=request.user)), status="accepted"
+        (Q(book__owner=request.user) | Q(borrower=request.user)), 
+        status="accepted"
     ).select_related("book", "borrower", "book__owner")
 
     context = {
         "received_requests": received_requests,
-        "sent_requests": sent_requests,
+        "sent_pending_requests": sent_pending_requests,
+        "sent_returned_requests": sent_returned_requests,
         "active_borrows": active_borrows,
     }
     return render(request, "core/books/requests.html", context)
@@ -379,6 +396,9 @@ def book_request_accept(request, request_id):
             user=book_request.borrower,
             notification_type="request_update",
             message=f'Your request to borrow "{book_request.book.title}" has been accepted.',
+            related_user=request.user,
+            related_book=book_request.book,
+            related_book_request=book_request
         )
 
         messages.success(request, "Book request accepted!")
@@ -402,6 +422,9 @@ def book_request_decline(request, request_id):
             user=book_request.borrower,
             notification_type="request_update",
             message=f'Your request to borrow "{book_request.book.title}" has been declined.',
+            related_user=request.user,
+            related_book=book_request.book,
+            related_book_request=book_request
         )
 
         messages.success(request, "Book request declined.")
@@ -414,37 +437,48 @@ def book_request_decline(request, request_id):
 def book_return(request, request_id):
     book_request = get_object_or_404(BookRequest, id=request_id, status="accepted")
 
-    # Ensure user is either the owner or borrower
-    if request.user not in [book_request.book.owner, book_request.borrower]:
-        messages.error(request, "You are not authorized to perform this action.")
+    # Ensure user is the owner
+    if request.user != book_request.book.owner:
+        messages.error(request, "Only the book owner can mark a book as returned.")
         return redirect("core:book_requests")
 
     if request.method == "POST":
         book_request.status = "returned"
+        book_request.returned_at = timezone.now()
         book_request.save()
 
         # Update book availability
         book_request.book.available = True
         book_request.book.save()
 
-        # Create notifications
-        if request.user == book_request.borrower:
-            Notification.objects.create(
-                user=book_request.book.owner,
-                notification_type="request_update",
-                message=f'{request.user.username} has marked "{book_request.book.title}" as returned.',
-            )
-        else:
-            Notification.objects.create(
-                user=book_request.borrower,
-                notification_type="request_update",
-                message=f'{request.user.username} has confirmed the return of "{book_request.book.title}".',
-            )
+        # Create notification for borrower
+        Notification.objects.create(
+            user=book_request.borrower,
+            notification_type="request_update",
+            message=f'{request.user.username} has confirmed the return of "{book_request.book.title}".',
+            related_user=request.user,
+            related_book=book_request.book,
+            related_book_request=book_request
+        )
 
         messages.success(request, "Book marked as returned successfully!")
         return redirect("core:book_requests")
 
     return redirect("core:book_requests")
+
+
+@login_required
+def notification_redirect(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    
+    # Mark the notification as read
+    if not notification.read:
+        notification.read = True
+        notification.save()
+    
+    # Get the URL to redirect to
+    redirect_url = notification.get_notification_url()
+    return redirect(redirect_url)
 
 
 @login_required
@@ -459,7 +493,10 @@ def notifications_view(request):
         notifications.filter(read=False).update(read=True)
         return redirect("core:notifications")
 
-    context = {"notifications": notifications, "unread_count": unread_count}
+    context = {
+        "notifications": notifications,
+        "unread_count": unread_count,
+    }
     return render(request, "core/notifications/list.html", context)
 
 
@@ -493,11 +530,23 @@ def search(request):
                 )
                 .exclude(id=request.user.id)
                 .distinct()
+                .select_related('userprofile')
             )
 
             # Create UserProfile for users that don't have one
             for user in users:
                 UserProfile.objects.get_or_create(user=user)
+
+            # Get friendship status for each user
+            friendship_status = {}
+            for user in users:
+                friendship = Friendship.objects.filter(
+                    (Q(sender=request.user, receiver=user) | Q(sender=user, receiver=request.user))
+                ).first()
+                if friendship:
+                    friendship_status[user.id] = friendship.status
+                else:
+                    friendship_status[user.id] = None
 
         if search_type in ["all", "books"]:
             # Get friend IDs
@@ -523,6 +572,7 @@ def search(request):
         "search_type": search_type,
         "users": users,
         "books": books,
+        "friendship_status": friendship_status if 'friendship_status' in locals() else {},
     }
     return render(request, "core/search/results.html", context)
 
@@ -579,6 +629,7 @@ def friend_remove(request, username):
             user=friend,
             notification_type="friend_request",
             message=f"{request.user.username} has removed you from their friends list.",
+            related_user=request.user
         )
 
         messages.success(request, f"Removed {friend.get_full_name()} from friends.")

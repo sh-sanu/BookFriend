@@ -21,12 +21,15 @@
                             {% else %}
                                 <p class="mb-1">Borrowed by: {{ borrow.borrower.get_full_name }}</p>
                             {% endif %}
-                            <small class="text-muted">Return date: {{ borrow.return_date }}</small>
+                            <small class="text-muted">Borrowed on: {{ borrow.created_at|date:"F d, Y" }}</small><br>
+                            <small class="text-muted">Return by: {{ borrow.return_date|date:"F d, Y" }}</small>
                         </div>
+                        {% if request.user == borrow.book.owner %}
                         <form method="post" action="{% url 'core:book_return' borrow.id %}">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-success btn-sm">Mark as Returned</button>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
@@ -45,7 +48,8 @@
                         <div>
                             <h5 class="mb-1">{{ request.book.title }}</h5>
                             <p class="mb-1">Requested by: {{ request.borrower.get_full_name }}</p>
-                            <small class="text-muted">Return by: {{ request.return_date }}</small>
+                            <small class="text-muted">Requested on: {{ request.created_at|date:"F d, Y" }}</small><br>
+                            <small class="text-muted">Return by: {{ request.return_date|date:"F d, Y" }}</small>
                         </div>
                         <div class="btn-group">
                             <form method="post" action="{% url 'core:book_request_accept' request.id %}" class="d-inline">
@@ -67,23 +71,37 @@
 
     <!-- Sent Requests -->
     <h2 class="mb-3">Sent Requests</h2>
-    {% if sent_requests %}
+    {% if sent_pending_requests or sent_returned_requests %}
         <div class="list-group">
-            {% for request in sent_requests %}
+            {% for request in sent_pending_requests %}
                 <div class="list-group-item">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="mb-1">{{ request.book.title }}</h5>
                             <p class="mb-1">Owner: {{ request.book.owner.get_full_name }}</p>
-                            <small class="text-muted">Return by: {{ request.return_date }}</small>
+                            <small class="text-muted">Requested on: {{ request.created_at|date:"F d, Y" }}</small><br>
+                            <small class="text-muted">Return by: {{ request.return_date|date:"F d, Y" }}</small>
                         </div>
-                        <span class="badge bg-secondary">Pending</span>
+                        <span class="badge bg-warning">Pending</span>
+                    </div>
+                </div>
+            {% endfor %}
+            {% for request in sent_returned_requests %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">{{ request.book.title }}</h5>
+                            <p class="mb-1">Owner: {{ request.book.owner.get_full_name }}</p>
+                            <small class="text-muted">Borrowed on: {{ request.created_at|date:"F d, Y" }}</small><br>
+                            <small class="text-muted">Returned on: {{ request.returned_at|date:"F d, Y" }}</small>
+                        </div>
+                        <span class="badge bg-success">Returned</span>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <p class="text-muted">No pending requests sent.</p>
+        <p class="text-muted">No requests sent.</p>
     {% endif %}
 </div>
 {% endblock %} 

@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load core_extras %}
 
 {% block title %}Search - Book Friend{% endblock %}
 
@@ -36,11 +37,30 @@
                         <div class="col">
                             <div class="card h-100">
                                 <div class="card-body text-center">
+                                    {% if user.userprofile.profile_picture %}
+                                        <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.get_full_name }}" 
+                                             class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                                    {% else %}
+                                        <img src="{% static 'core/images/default_profile.png' %}" alt="Default Profile" 
+                                             class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                                    {% endif %}
                                     <h5 class="card-title">{{ user.get_full_name }}</h5>
                                     <p class="text-muted">@{{ user.username }}</p>
-                                    <div class="btn-group">
-                                        <a href="{% url 'core:profile' username=user.username %}" class="btn btn-primary btn-sm">View Profile</a>
-                                        <a href="{% url 'core:library' username=user.username %}" class="btn btn-outline-primary btn-sm">View Library</a>
+                                    <div class="d-flex flex-column gap-2">
+                                        <div class="btn-group">
+                                            <a href="{% url 'core:profile' username=user.username %}" class="btn btn-primary btn-sm">View Profile</a>
+                                            <a href="{% url 'core:library' username=user.username %}" class="btn btn-outline-primary btn-sm">View Library</a>
+                                        </div>
+                                        {% if friendship_status|get_item:user.id == None %}
+                                            <form method="post" action="{% url 'core:friend_add' username=user.username %}" class="mt-2">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-success btn-sm w-100">Add Friend</button>
+                                            </form>
+                                        {% elif friendship_status|get_item:user.id == 'pending' %}
+                                            <button class="btn btn-secondary btn-sm w-100" disabled>Friend Request Sent</button>
+                                        {% elif friendship_status|get_item:user.id == 'accepted' %}
+                                            <button class="btn btn-success btn-sm w-100" disabled>Friends</button>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -60,6 +80,13 @@
                     {% for book in books %}
                         <div class="col">
                             <div class="card h-100">
+                                {% if book.cover_image %}
+                                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}"
+                                         style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{% static 'core/images/default_book.png' %}" class="card-img-top" alt="Default Book Cover"
+                                         style="height: 200px; object-fit: cover;">
+                                {% endif %}
                                 <div class="card-body">
                                     <h5 class="card-title">{{ book.title }}</h5>
                                     <p class="card-text">

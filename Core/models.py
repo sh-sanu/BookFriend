@@ -64,6 +64,7 @@ class BookRequest(models.Model):
     return_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    returned_at = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
         return f"{self.borrower.username} requests {self.book.title}"
@@ -82,5 +83,38 @@ class Notification(models.Model):
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
+    # Reference fields for linking
+    related_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='related_notifications')
+    related_book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True, blank=True)
+    related_book_request = models.ForeignKey(BookRequest, on_delete=models.SET_NULL, null=True, blank=True)
+    related_friendship = models.ForeignKey(Friendship, on_delete=models.SET_NULL, null=True, blank=True)
+    
     def __str__(self):
         return f"{self.notification_type} for {self.user.username}"
+        
+    def get_notification_url(self):
+        if self.notification_type == 'friend_request':
+            if self.related_friendship:
+                return reverse('core:friend_requests')
+            elif self.related_user:
+                return reverse('core:profile', kwargs={'username': self.related_user.username})
+            return reverse('core:dashboard')
+            
+        elif self.notification_type == 'book_request':
+            if self.related_book_request:
+                return reverse('core:book_requests')
+            elif self.related_book:
+                return reverse('core:library', kwargs={'username': self.related_book.owner.username})
+            return reverse('core:dashboard')
+            
+        elif self.notification_type == 'request_update':
+            if self.related_book_request:
+                return reverse('core:book_requests')
+            return reverse('core:dashboard')
+            
+        elif self.notification_type == 'due_reminder':
+            if self.related_book_request:
+                return reverse('core:book_requests')
+            return reverse('core:dashboard')
+            
+        return reverse('core:dashboard')

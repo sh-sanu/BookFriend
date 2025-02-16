@@ -49,4 +49,5 @@ urlpatterns = [
     # Notifications
     path("notifications/", views.notifications_view, name="notifications"),
     path("notifications/api/", views.notifications_api, name="notifications_api"),
+    path("notifications/<int:notification_id>/redirect/", views.notification_redirect, name="notification_redirect"),
 ]

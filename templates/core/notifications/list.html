@@ -17,17 +17,17 @@
     {% if notifications %}
         <div class="list-group">
             {% for notification in notifications %}
-                <div class="list-group-item {% if not notification.read %}list-group-item-primary{% endif %}">
+                <a href="{% url 'core:notification_redirect' notification.id %}" class="list-group-item list-group-item-action {% if not notification.read %}list-group-item-primary{% endif %}">
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">{{ notification.get_notification_type_display }}</h5>
                         <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
                     </div>
                     <p class="mb-1">{{ notification.message }}</p>
-                </div>
+                </a>
             {% endfor %}
         </div>
     {% else %}
         <p class="text-muted">No notifications yet.</p>
     {% endif %}
 </div>
-{% endblock %} 
+{% endblock %}
