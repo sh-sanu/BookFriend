@@ -36,6 +36,29 @@ class Book(models.Model):
     def __str__(self):
         return self.title
 
+    def like_count(self):
+        return self.bookrating_set.filter(rating='like').count()
+
+    def dislike_count(self):
+        return self.bookrating_set.filter(rating='dislike').count()
+
+class BookRating(models.Model):
+    RATING_CHOICES = [
+        ('like', 'Like'),
+        ('dislike', 'Dislike'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    rating = models.CharField(max_length=7, choices=RATING_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'book']
+
+    def __str__(self):
+        return f"{self.user.username} {self.rating}d {self.book.title}"
+
 class Friendship(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -75,6 +98,7 @@ class Notification(models.Model):
         ('book_request', 'Book Request'),
         ('request_update', 'Request Update'),
         ('due_reminder', 'Due Reminder'),
+        ('book_rating', 'Book Rating'),
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -115,6 +139,11 @@ class Notification(models.Model):
         elif self.notification_type == 'due_reminder':
             if self.related_book_request:
                 return reverse('core:book_requests')
+            return reverse('core:dashboard')
+            
+        elif self.notification_type == 'book_rating':
+            if self.related_book:
+                return reverse('core:library', kwargs={'username': self.related_book.owner.username})
             return reverse('core:dashboard')
             
         return reverse('core:dashboard')

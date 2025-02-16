@@ -3,7 +3,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import SignUpForm, UserProfileForm, BookForm
-from .models import UserProfile, Book, Friendship, Notification, BookRequest
+from .models import UserProfile, Book, Friendship, Notification, BookRequest, BookRating
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
@@ -578,6 +578,80 @@ def search(request):
 
 
 @login_required
+@login_required
+def book_like(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    
+    # Check friendship
+    if not Friendship.objects.filter(
+        (Q(sender=request.user, receiver=book.owner) |
+         Q(sender=book.owner, receiver=request.user)),
+        status="accepted"
+    ).exists():
+        messages.error(request, "You must be friends to rate books")
+        return redirect("core:dashboard")
+
+    # Create or update rating
+    BookRating.objects.update_or_create(
+        user=request.user,
+        book=book,
+        defaults={'rating': 'like'}
+    )
+    
+    # Create notification
+    Notification.objects.create(
+        user=book.owner,
+        notification_type="book_rating",
+        message=f"{request.user.username} liked your book '{book.title}'",
+        related_user=request.user,
+        related_book=book
+    )
+    
+    return redirect(request.META.get('HTTP_REFERER', 'core:dashboard'))
+
+@login_required
+def book_dislike(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    
+    # Check friendship
+    if not Friendship.objects.filter(
+        (Q(sender=request.user, receiver=book.owner) |
+         Q(sender=book.owner, receiver=request.user)),
+        status="accepted"
+    ).exists():
+        messages.error(request, "You must be friends to rate books")
+        return redirect("core:dashboard")
+
+    # Create or update rating
+    BookRating.objects.update_or_create(
+        user=request.user,
+        book=book,
+        defaults={'rating': 'dislike'}
+    )
+    
+    # Create notification
+    Notification.objects.create(
+        user=book.owner,
+        notification_type="book_rating",
+        message=f"{request.user.username} disliked your book '{book.title}'",
+        related_user=request.user,
+        related_book=book
+    )
+    
+    return redirect(request.META.get('HTTP_REFERER', 'core:dashboard'))
+
+@login_required
+def book_ratings(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    likes = book.bookrating_set.filter(rating='like')
+    dislikes = book.bookrating_set.filter(rating='dislike')
+    context = {
+        'book': book,
+        'likes': likes,
+        'dislikes': dislikes,
+    }
+    return render(request, 'core/books/book_ratings.html', context)
+
 def dashboard(request):
     # Get books from friends
     friend_ids = Friendship.objects.filter(

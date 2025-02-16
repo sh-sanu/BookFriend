@@ -50,4 +50,8 @@ urlpatterns = [
     path("notifications/", views.notifications_view, name="notifications"),
     path("notifications/api/", views.notifications_api, name="notifications_api"),
     path("notifications/<int:notification_id>/redirect/", views.notification_redirect, name="notification_redirect"),
+    # Book Ratings
+    path("books/<int:book_id>/like/", views.book_like, name="book_like"),
+    path("books/<int:book_id>/dislike/", views.book_dislike, name="book_dislike"),
+    path("books/<int:book_id>/ratings/", views.book_ratings, name="book_ratings"),
 ]

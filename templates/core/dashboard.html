@@ -65,8 +65,25 @@
                             </p>
                         </div>
                         <div class="card-footer">
-                            <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm">Request Book</a>
-                            <a href="{% url 'core:library' username=book.owner.username %}" class="btn btn-outline-secondary btn-sm">View Library</a>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <form method="post" action="{% url 'core:book_like' book.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-hand-thumbs-up"></i> {{ book.like_count }}
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'core:book_dislike' book.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-hand-thumbs-down"></i> {{ book.dislike_count }}
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm">Request Book</a>
+                            </div>
+                            <a href="{% url 'core:book_ratings' book.id %}" class="btn btn-sm btn-outline-info">View Ratings</a>
+                            <a href="{% url 'core:library' username=book.owner.username %}" class="btn btn-sm btn-outline-secondary">View Library</a>
                         </div>
                     </div>
                 </div>

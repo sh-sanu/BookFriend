@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Book Ratings - Book Friend{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ book.title }} Ratings</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Likes ({{ book.like_count }})</h2>
+            <ul class="list-group">
+                {% for rating in likes %}
+                <li class="list-group-item">{{ rating.user.username }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h2>Dislikes ({{ book.dislike_count }})</h2>
+            <ul class="list-group">
+                {% for rating in dislikes %}
+                <li class="list-group-item">{{ rating.user.username }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <a href="{% url 'core:library' username=book.owner.username %}" class="btn btn-secondary mt-3">Back to Library</a>
+</div>
+{% endblock %}
