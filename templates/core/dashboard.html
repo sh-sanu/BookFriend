@@ -1,103 +1,141 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
+<style>
+  /* Custom Styles for the Modern Dashboard */
+  .card-hover {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  }
+  /* Larger book cover with fixed height */
+  .book-thumbnail {
+      position: relative;
+  }
+  .book-thumbnail img {
+      object-fit: cover;
+      width: 100%;
+      height: 250px;  /* Bigger cover height */
+      border-top-left-radius: 0.25rem;
+      border-top-right-radius: 0.25rem;
+  }
+  /* Rating button on top of the book cover */
+  .rating-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+      background: rgb(255, 208, 0);
+      color: rgb(0, 0, 0);
+      border: none;
+      padding: 5px 8px;
+      border-radius: 0.25rem;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+  }
+  .rating-button i {
+      margin-right: 1px;
+  }
+  /* Prominent book title styling */
+  .book-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-top: 0.5rem;
+      color: #333;
+  }
+  /* For mobile, force notifications to appear on top */
+  @media (max-width: 767.98px) {
+      .order-mobile-first {
+          order: -1;
+      }
+  }
+</style>
+
 <div class="container my-4">
-    <h1 class="mb-4">Dashboard</h1>
-    <div class="row">
-        <!-- Friends' Books Section -->
-        <div class="col-lg-8">
-            <h2 class="mb-3">Friends' Books</h2>
-            <div class="row">
-                {% for book in friend_books %}
-                    <div class="col-sm-6 col-md-4 mb-4">
-                        <div class="card h-100 d-flex flex-column">
-                            <!-- Book Cover -->
-                            <a href="{% url 'core:book_detail' book.id %}">
-                                <img 
-                                    src="{{ book.cover_image.url }}" 
-                                    class="card-img-top img-fluid" 
-                                    alt="{{ book.title }}"
-                                    style="height: 300px; object-fit: cover;"
-                                >
-                            </a>
-                            <!-- Card Body -->
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title mb-2">
-                                    <a href="{% url 'core:book_detail' book.id %}" class="text-decoration-none">
-                                        {{ book.title }}
-                                    </a>
-                                </h5>
-                                <p class="card-text mb-3">
-                                    Owner: 
-                                    <a href="{% url 'core:profile' book.owner.username %}">
-                                        {{ book.owner.username }}
-                                    </a>
-                                </p>
-
-                                <!-- Action Buttons -->
-                                <div class="btn-group mb-3" role="group">
-                                    <a href="{% url 'core:book_like' book.id %}" class="btn btn-sm btn-success" title="Like">
-                                        <i class="bi bi-hand-thumbs-up"></i>
-                                    </a>
-                                    <a href="{% url 'core:book_dislike' book.id %}" class="btn btn-sm btn-warning" title="Dislike">
-                                        <i class="bi bi-hand-thumbs-down"></i>
-                                    </a>
-                                    <a href="{% url 'core:book_ratings' book.id %}" class="btn btn-sm btn-info">
-                                        View Ratings
-                                    </a>
-                                    <a href="{% url 'core:book_request' book.id %}" class="btn btn-sm btn-primary">
-                                        Request Book
-                                    </a>
-                                    <a href="{% url 'core:library' book.owner.username %}" class="btn btn-sm btn-secondary">
-                                        View Full Library
-                                    </a>
-                                </div>
-
-                                <!-- Likes/Dislikes and Rating -->
-                                <p class="card-text mb-1">
-                                    <i class="bi bi-hand-thumbs-up"></i> {{ book.likes }}
-                                    <i class="bi bi-hand-thumbs-down ms-3"></i> {{ book.dislikes }}
-                                </p>
-                                <p class="card-text mb-0">
-                                    Rating:
-                                    {% for i in '*****' %}
-                                        {% if book.average_rating > forloop.counter0 %}
-                                            <i class="bi bi-star-fill text-warning"></i>
-                                        {% else %}
-                                            <i class="bi bi-star text-warning"></i>
-                                        {% endif %}
-                                    {% endfor %}
-                                    ({{ book.total_ratings }} ratings)
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                {% empty %}
-                    <div class="col-12">
-                        <p class="text-muted">No books from friends available.</p>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Notifications Section -->
-        <div class="col-lg-4">
-            <div class="card mb-4">
+    <!-- Notifications Section (Always on top in mobile view) -->
+    <div class="row order-mobile-first mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm">
                 <div class="card-header">
                     <h2 class="h5 mb-0">Notifications</h2>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info d-flex align-items-center mb-2" role="alert">
+                    <a href="{% url 'core:friend_requests' %}" class="alert alert-info d-flex align-items-center mb-2 text-decoration-none">
                         <i class="bi bi-person-plus-fill me-2"></i>
                         <span>You have {{ friend_requests }} friend request{{ friend_requests|pluralize }}.</span>
-                    </div>
-                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                    </a>
+                    <a href="{% url 'core:book_requests' %}" class="alert alert-info d-flex align-items-center text-decoration-none">
                         <i class="bi bi-book-fill me-2"></i>
                         <span>You have {{ book_requests }} book request{{ book_requests|pluralize }}.</span>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
+    </div>
+
+    <h1><strong>Dashboard:</strong></h1>
+    <!-- Books Section inside a centered container -->
+    <div class="row">
+        {% for book in friend_books %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <div class="card card-hover shadow-sm h-100">
+                    <!-- Book Cover -->
+                    <div class="book-thumbnail">
+                        <a href="{% url 'core:book_detail' book.id %}">
+                            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+                        </a>
+                        <!-- Rating Button on top of the cover with dynamic stars -->
+                        <a href="{% url 'core:book_ratings' book.id %}" class="rating-button">
+                            {% for i in '12345' %}
+                                {% if book.average_rating|floatformat:1 > forloop.counter0 %}
+                                    <i class="bi bi-star-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ms-1">({{ book.total_ratings }})</span>
+                        </a>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <!-- Book Title moved out of cover area -->
+                        <div class="book-title">
+                            <a href="{% url 'core:book_detail' book.id %}" class="text-dark text-decoration-none">
+                                {{ book.title }}
+                            </a>
+                        </div>
+                        <!-- Owner Information -->
+                        <p class="card-text small text-muted">
+                            Author: {{ book.author|default:"Unknown Author" }}
+                        </a><br>
+                        Shared By: <a href="{% url 'core:profile' book.owner.username %}" class="text-muted">
+                                {{ book.owner.username }}
+                        </a>
+                        </p>
+                        <!-- Action Buttons with wider layout -->
+                        <div class="d-flex gap-2 mb-2">
+                            <a href="{% url 'core:book_like' book.id %}" class="btn btn-outline-success btn-sm flex-fill">
+                                <i class="bi bi-hand-thumbs-up"></i> {{ book.likes }}
+                            </a>
+                            <a href="{% url 'core:book_dislike' book.id %}" class="btn btn-outline-warning btn-sm flex-fill">
+                                <i class="bi bi-hand-thumbs-down"></i> {{ book.dislikes }}
+                            </a>
+                        </div>
+                        <!-- Full-width Request Button -->
+                        <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-book"></i> Request Book
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="text-muted">No books from friends available.</p>
+            </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
