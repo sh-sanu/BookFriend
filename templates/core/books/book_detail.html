@@ -1,45 +1,97 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-    <h1>{{ book.title }}</h1>
-    <p>Author: {{ book.author }}</p>
-    <p>Genre: {{ book.genre }}</p>
-    <img src="{{ book.cover_image.url }}" alt="{{ book.title }} Cover" width="200">
-    <p>Description: {{ book.description }}</p>
-    {% include 'core/includes/_book_actions.html' %}
+<div class="container my-4">
+  <div class="row">
+    <!-- Main Content Column -->
+    <div class="col-lg-8">
+      <!-- Book Details Card -->
+      <div class="card mb-4">
+        <div class="row g-0">
+          <div class="col-md-4">
+            <img 
+              src="{{ book.cover_image.url }}" 
+              class="img-fluid rounded-start" 
+              alt="{{ book.title }} Cover"
+            >
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h1 class="card-title">{{ book.title }}</h1>
+              <p class="card-text mb-1"><strong>Author:</strong> {{ book.author }}</p>
+              <p class="card-text mb-1"><strong>Genre:</strong> {{ book.genre }}</p>
+              <p class="card-text">{{ book.description }}</p>
+              {% include 'core/includes/_book_actions.html' %}
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <h2>Reviews</h2>
-    {% if reviews %}
-        <ul>
-            {% for review in reviews %}
-                <li>
-                    {{ review.user.username }} - {{ review.rating }}/5 Stars - {{ review.created_at }}
-                    {% if review.review_text %}
-                        <p>{{ review.review_text }}</p>
-                    {% endif %}
-                    {% if request.user == review.user or request.user == book.owner %}
-                        <form method="post" action="{% url 'core:delete_review' review.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Delete Review</button>
-                        </form>
-                    {% endif %}
+      <!-- Reviews Section -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Reviews</h2>
+        </div>
+        <div class="card-body">
+          {% if reviews %}
+            <ul class="list-unstyled mb-0">
+              {% for review in reviews %}
+                <li class="mb-3 pb-2 border-bottom">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>{{ review.user.username }}</strong>
+                      <small class="text-muted"> - {{ review.created_at|date:"M d, Y" }}</small>
+                    </div>
+                    <span class="badge bg-secondary">{{ review.rating }}/5 Stars</span>
+                  </div>
+                  {% if review.review_text %}
+                    <p class="mt-2 mb-1">{{ review.review_text }}</p>
+                  {% endif %}
+                  {% if request.user == review.user or request.user == book.owner %}
+                    <form method="post" action="{% url 'core:delete_review' review.id %}" class="mt-2">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-danger">Delete Review</button>
+                    </form>
+                  {% endif %}
                 </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No reviews yet.</p>
-    {% endif %}
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">No reviews yet.</p>
+          {% endif %}
+        </div>
+      </div>
 
-    {% if is_friend %}
-        <h2>Submit a Review</h2>
-        <form method="post" action="{% url 'core:submit_review' book.id %}">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Submit Review</button>
-        </form>
-    {% else %}
-        <p>You must be friends with the book owner to submit a review.</p>
-    {% endif %}
+      <!-- Submit Review Section -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Submit a Review</h2>
+        </div>
+        <div class="card-body">
+          {% if is_friend %}
+            <form method="post" action="{% url 'core:submit_review' book.id %}">
+              {% csrf_token %}
+              {{ form.as_p }}
+              <button type="submit" class="btn btn-primary">Submit Review</button>
+            </form>
+          {% else %}
+            <p class="text-muted">You must be friends with the book owner to submit a review.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
 
-    <a href="{% url 'core:library' book.owner.username %}">Back to Library</a>
+    <!-- Sidebar Column -->
+    <div class="col-lg-4">
+      <div class="card mb-4">
+        <div class="card-body">
+          <a href="{% url 'core:library' book.owner.username %}" class="btn btn-outline-primary w-100">
+            Back to Library
+          </a>
+        </div>
+      </div>
+      <!-- Additional sidebar content can be added here if needed -->
+    </div>
+  </div>
+</div>
 {% endblock %}
