@@ -6,6 +6,7 @@
     <p>Genre: {{ book.genre }}</p>
     <img src="{{ book.cover_image.url }}" alt="{{ book.title }} Cover" width="200">
     <p>Description: {{ book.description }}</p>
+    {% include 'core/includes/_book_actions.html' %}
 
     <h2>Reviews</h2>
     {% if reviews %}

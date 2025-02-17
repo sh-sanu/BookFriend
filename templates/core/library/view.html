@@ -24,14 +24,7 @@
                             <a href="{% url 'core:book_edit' book.id %}" class="btn btn-sm btn-secondary">Edit</a>
                             <a href="{% url 'core:book_delete' book.id %}" class="btn btn-sm btn-danger">Delete</a>
                         {% else %}
-                            <div class="btn-group" role="group">
-                                <a href="{% url 'core:book_like' book.id %}" class="btn btn-sm btn-success">Like</a>
-                                <a href="{% url 'core:book_dislike' book.id %}" class="btn btn-sm btn-warning">Dislike</a>
-                                <a href="{% url 'core:book_ratings' book.id %}" class="btn btn-sm btn-info">View Ratings</a>
-                                {% if is_friend %}
-                                    <a href="{% url 'core:book_request' book.id %}" class="btn btn-sm btn-primary">Request Book</a>
-                                {% endif %}
-                            </div>
+                            {% include 'core/includes/_book_actions.html' %}
                         {% endif %}
                     </div>
                 </div>

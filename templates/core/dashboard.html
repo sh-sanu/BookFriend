@@ -18,12 +18,7 @@
                                     <a href="{% url 'core:book_detail' book.id %}">{{ book.title }}</a>
                                 </h5>
                                 <p class="card-text">Owner: <a href="{% url 'core:profile' book.owner.username %}">{{ book.owner.username }}</a></p>
-                                <div class="btn-group" role="group">
-                                    <a href="{% url 'core:book_like' book.id %}" class="btn btn-sm btn-success" title="Like"><i class="bi bi-hand-thumbs-up"></i></a>
-                                    <a href="{% url 'core:book_dislike' book.id %}" class="btn btn-sm btn-warning" title="Dislike"><i class="bi bi-hand-thumbs-down"></i></a>
-                                    <a href="{% url 'core:book_ratings' book.id %}" class="btn btn-sm btn-info">View Ratings</a>
-                                    <a href="{% url 'core:book_request' book.id %}" class="btn btn-sm btn-primary">Request Book</a>
-                                </div>
+                                {% include 'core/includes/_book_actions.html' %}
                                 <p class="card-text">
                                     <i class="bi bi-hand-thumbs-up"></i> {{ book.likes }}
                                     <i class="bi bi-hand-thumbs-down"></i> {{ book.dislikes }}

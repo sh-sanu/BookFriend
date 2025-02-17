@@ -1,0 +1,7 @@
+<div class="btn-group" role="group">
+        <a href="{% url 'core:book_like' book.id %}" class="btn btn-sm btn-success" title="Like"><i class="bi bi-hand-thumbs-up"></i></a>
+        <a href="{% url 'core:book_dislike' book.id %}" class="btn btn-sm btn-warning" title="Dislike"><i class="bi bi-hand-thumbs-down"></i></a>
+        <a href="{% url 'core:book_ratings' book.id %}" class="btn btn-sm btn-info">View Ratings</a>
+        <a href="{% url 'core:book_request' book.id %}" class="btn btn-sm btn-primary">Request Book</a>
+        <a href="{% url 'core:library' book.owner.username %}" class="btn btn-sm btn-secondary">View Full Library</a>
+    </div>
