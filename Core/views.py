@@ -22,6 +22,9 @@ def landing_page(request):
     return render(request, "core/auth/auth.html")
 
 
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+
 def signup_view(request):
     if request.user.is_authenticated:
         return redirect("core:dashboard")
@@ -30,7 +33,11 @@ def signup_view(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
-            UserProfile.objects.create(user=user)
+            user.first_name = form.cleaned_data['first_name']
+            user.last_name = form.cleaned_data['last_name']
+            user.email = form.cleaned_data['email']
+            user.save()
+            profile = UserProfile.objects.create(user=user)
             login(request, user)
             messages.success(request, "Account created successfully!")
             return redirect("core:profile", username=user.username)
@@ -39,7 +46,7 @@ def signup_view(request):
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
 
-    return redirect("core:landing")
+    return render(request, "core/auth/signup.html", {"form": form})
 
 
 def login_view(request):
