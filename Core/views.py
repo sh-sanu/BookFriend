@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import SignUpForm, UserProfileForm, BookForm
-from .models import UserProfile, Book, Friendship, Notification, BookRequest, BookRating
+from .forms import SignUpForm, UserProfileForm, BookForm, BookReviewForm
+from .models import UserProfile, Book, Friendship, Notification, BookRequest, BookRating, BookReview
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
@@ -715,3 +715,74 @@ def friend_remove(request, username):
         return redirect("core:profile", username=username)
 
     return redirect("core:profile", username=username)
+
+@login_required
+def book_detail(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    reviews = book.reviews.all().order_by('-created_at')
+    form = BookReviewForm()
+
+    is_friend = Friendship.objects.filter(
+        (Q(sender=request.user, receiver=book.owner) | Q(sender=book.owner, receiver=request.user)),
+        status="accepted",
+    ).exists()
+
+    context = {
+        'book': book,
+        'reviews': reviews,
+        'form': form,
+        'is_friend': is_friend,
+    }
+    return render(request, 'core/books/book_detail.html', context)
+
+@login_required
+def submit_review(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+
+    # Check if user is friends with book owner
+    if not Friendship.objects.filter(
+        (Q(sender=request.user, receiver=book.owner) | Q(sender=book.owner, receiver=request.user)),
+        status="accepted",
+    ).exists():
+        messages.error(request, "You must be friends with the book owner to submit a review.")
+        return redirect('core:book_detail', book_id=book_id)
+
+    if request.method == 'POST':
+        form = BookReviewForm(request.POST)
+        if form.is_valid():
+            review = BookReview.objects.create(
+                user=request.user,
+                book=book,
+                rating=form.cleaned_data['rating'],
+                review_text=form.cleaned_data['review_text']
+            )
+
+            # Create notification for book owner
+            Notification.objects.create(
+                user=book.owner,
+                notification_type='book_review',
+                message=f"{request.user.username} reviewed your book '{book.title}'.",
+                related_book_review=review
+            )
+
+            messages.success(request, "Review submitted successfully!")
+            return redirect('core:book_detail', book_id=book_id)
+        else:
+            messages.error(request, "Invalid review data.")
+            return redirect('core:book_detail', book_id=book_id)
+    else:
+        return redirect('core:book_detail', book_id=book_id)
+
+@login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(BookReview, id=review_id)
+    book_id = review.book.id
+
+    # Check if user is the reviewer or the book owner
+    if request.user != review.user and request.user != review.book.owner:
+        messages.error(request, "You do not have permission to delete this review.")
+        return redirect('core:book_detail', book_id=book_id)
+
+    review.delete()
+    messages.success(request, "Review deleted successfully!")
+    return redirect('core:book_detail', book_id=book_id)

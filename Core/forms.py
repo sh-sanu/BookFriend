@@ -1,30 +1,42 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from .models import UserProfile, Book
+from .models import UserProfile, Book, BookReview
 
-class SignUpForm(UserCreationForm):
-    first_name = forms.CharField(max_length=30, required=True)
-    last_name = forms.CharField(max_length=30, required=True)
-    email = forms.EmailField(max_length=254, required=True)
-    terms_accepted = forms.BooleanField(required=True)
+class SignUpForm(forms.Form):
+    first_name = forms.CharField(max_length=100, label="First Name")
+    last_name = forms.CharField(max_length=100, label="Last Name")
+    username = forms.CharField(max_length=150, label="Username")
+    email = forms.EmailField(label="Email")
+    password = forms.CharField(widget=forms.PasswordInput, label="Password")
+    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
 
-    class Meta:
-        model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'terms_accepted')
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password != confirm_password:
+            raise forms.ValidationError("Passwords do not match.")
+
+        return cleaned_data
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ('bio', 'profile_picture', 'birthplace', 'current_residence', 'occupation')
-        widgets = {
-            'bio': forms.Textarea(attrs={'rows': 4}),
-        }
+        fields = ['bio', 'profile_picture', 'birthplace', 'current_residence', 'occupation']
 
 class BookForm(forms.ModelForm):
     class Meta:
         model = Book
-        fields = ['title', 'author', 'genre', 'condition', 'cover_image', 'description']
-        widgets = {
-            'description': forms.Textarea(attrs={'rows': 4}),
-        } 
+        fields = ['title', 'author', 'genre', 'condition', 'cover_image', 'description', 'available']
+
+class BookReviewForm(forms.Form):
+    rating = forms.ChoiceField(
+        choices=BookReview.RATING_CHOICES,
+        label="Rating",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    review_text = forms.CharField(
+        label="Review (Optional)",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=False
+    )

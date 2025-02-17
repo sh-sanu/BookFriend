@@ -25,7 +25,9 @@ urlpatterns = [
     path("friends/", views.friends_list, name="friends_list"),
     path("friends/requests/", views.friend_requests, name="friend_requests"),
     path("friends/add/<str:username>/", views.friend_add, name="friend_add"),
-    path("friends/accept/<int:request_id>/", views.friend_accept, name="friend_accept"),
+    path(
+        "friends/accept/<int:request_id>/", views.friend_accept, name="friend_accept"
+    ),
     path(
         "friends/decline/<int:request_id>/", views.friend_decline, name="friend_decline"
     ),
@@ -54,4 +56,8 @@ urlpatterns = [
     path("books/<int:book_id>/like/", views.book_like, name="book_like"),
     path("books/<int:book_id>/dislike/", views.book_dislike, name="book_dislike"),
     path("books/<int:book_id>/ratings/", views.book_ratings, name="book_ratings"),
+    # Book Detail and Reviews
+    path("books/<int:book_id>/", views.book_detail, name="book_detail"),
+    path("books/<int:book_id>/submit_review/", views.submit_review, name="submit_review"),
+    path("reviews/<int:review_id>/delete/", views.delete_review, name="delete_review"),
 ]

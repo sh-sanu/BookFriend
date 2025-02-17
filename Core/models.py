@@ -59,6 +59,24 @@ class BookRating(models.Model):
     def __str__(self):
         return f"{self.user.username} {self.rating}d {self.book.title}"
 
+class BookReview(models.Model):
+    RATING_CHOICES = [
+        (1, '1 Star'),
+        (2, '2 Stars'),
+        (3, '3 Stars'),
+        (4, '4 Stars'),
+        (5, '5 Stars'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    review_text = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} rated {self.book.title} with {self.rating} stars"
+
 class Friendship(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -99,6 +117,7 @@ class Notification(models.Model):
         ('request_update', 'Request Update'),
         ('due_reminder', 'Due Reminder'),
         ('book_rating', 'Book Rating'),
+        ('book_review', 'Book Review'), # Added book review notification type
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -112,6 +131,7 @@ class Notification(models.Model):
     related_book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True, blank=True)
     related_book_request = models.ForeignKey(BookRequest, on_delete=models.SET_NULL, null=True, blank=True)
     related_friendship = models.ForeignKey(Friendship, on_delete=models.SET_NULL, null=True, blank=True)
+    related_book_review = models.ForeignKey('BookReview', on_delete=models.SET_NULL, null=True, blank=True) # Added book review relation
     
     def __str__(self):
         return f"{self.notification_type} for {self.user.username}"
@@ -144,6 +164,11 @@ class Notification(models.Model):
         elif self.notification_type == 'book_rating':
             if self.related_book:
                 return reverse('core:library', kwargs={'username': self.related_book.owner.username})
+            return reverse('core:dashboard')
+            
+        elif self.notification_type == 'book_review': # Added book review notification redirect
+            if self.related_book_review:
+                return reverse('core:book_detail', kwargs={'book_id': self.related_book_review.book.id})
             return reverse('core:dashboard')
             
         return reverse('core:dashboard')

@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    <h1>{{ book.title }}</h1>
+    <p>Author: {{ book.author }}</p>
+    <p>Genre: {{ book.genre }}</p>
+    <img src="{{ book.cover_image.url }}" alt="{{ book.title }} Cover" width="200">
+    <p>Description: {{ book.description }}</p>
+
+    <h2>Reviews</h2>
+    {% if reviews %}
+        <ul>
+            {% for review in reviews %}
+                <li>
+                    {{ review.user.username }} - {{ review.rating }}/5 Stars - {{ review.created_at }}
+                    {% if review.review_text %}
+                        <p>{{ review.review_text }}</p>
+                    {% endif %}
+                    {% if request.user == review.user or request.user == book.owner %}
+                        <form method="post" action="{% url 'core:delete_review' review.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Delete Review</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No reviews yet.</p>
+    {% endif %}
+
+    {% if is_friend %}
+        <h2>Submit a Review</h2>
+        <form method="post" action="{% url 'core:submit_review' book.id %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+    {% else %}
+        <p>You must be friends with the book owner to submit a review.</p>
+    {% endif %}
+
+    <a href="{% url 'core:library' book.owner.username %}">Back to Library</a>
+{% endblock %}
