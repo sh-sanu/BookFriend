@@ -1,35 +1,70 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-    <h1>Dashboard</h1>
-
+<div class="container my-4">
+    <h1 class="mb-4">Dashboard</h1>
     <div class="row">
-        <div class="col-md-8">
-            <h2>Friends' Books</h2>
+        <!-- Friends' Books Section -->
+        <div class="col-lg-8">
+            <h2 class="mb-3">Friends' Books</h2>
             <div class="row">
                 {% for book in friend_books %}
-                    <div class="col-sm-6 col-md-4">
-                        <div class="card mb-4">
+                    <div class="col-sm-6 col-md-4 mb-4">
+                        <div class="card h-100 d-flex flex-column">
+                            <!-- Book Cover -->
                             <a href="{% url 'core:book_detail' book.id %}">
-                                <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}">
+                                <img 
+                                    src="{{ book.cover_image.url }}" 
+                                    class="card-img-top img-fluid" 
+                                    alt="{{ book.title }}"
+                                    style="height: 300px; object-fit: cover;"
+                                >
                             </a>
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <a href="{% url 'core:book_detail' book.id %}">{{ book.title }}</a>
+                            <!-- Card Body -->
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title mb-2">
+                                    <a href="{% url 'core:book_detail' book.id %}" class="text-decoration-none">
+                                        {{ book.title }}
+                                    </a>
                                 </h5>
-                                <p class="card-text">Owner: <a href="{% url 'core:profile' book.owner.username %}">{{ book.owner.username }}</a></p>
-                                {% include 'core/includes/_book_actions.html' %}
-                                <p class="card-text">
-                                    <i class="bi bi-hand-thumbs-up"></i> {{ book.likes }}
-                                    <i class="bi bi-hand-thumbs-down"></i> {{ book.dislikes }}
+                                <p class="card-text mb-3">
+                                    Owner: 
+                                    <a href="{% url 'core:profile' book.owner.username %}">
+                                        {{ book.owner.username }}
+                                    </a>
                                 </p>
-                                <p class="card-text">
+
+                                <!-- Action Buttons -->
+                                <div class="btn-group mb-3" role="group">
+                                    <a href="{% url 'core:book_like' book.id %}" class="btn btn-sm btn-success" title="Like">
+                                        <i class="bi bi-hand-thumbs-up"></i>
+                                    </a>
+                                    <a href="{% url 'core:book_dislike' book.id %}" class="btn btn-sm btn-warning" title="Dislike">
+                                        <i class="bi bi-hand-thumbs-down"></i>
+                                    </a>
+                                    <a href="{% url 'core:book_ratings' book.id %}" class="btn btn-sm btn-info">
+                                        View Ratings
+                                    </a>
+                                    <a href="{% url 'core:book_request' book.id %}" class="btn btn-sm btn-primary">
+                                        Request Book
+                                    </a>
+                                    <a href="{% url 'core:library' book.owner.username %}" class="btn btn-sm btn-secondary">
+                                        View Full Library
+                                    </a>
+                                </div>
+
+                                <!-- Likes/Dislikes and Rating -->
+                                <p class="card-text mb-1">
+                                    <i class="bi bi-hand-thumbs-up"></i> {{ book.likes }}
+                                    <i class="bi bi-hand-thumbs-down ms-3"></i> {{ book.dislikes }}
+                                </p>
+                                <p class="card-text mb-0">
                                     Rating:
                                     {% for i in '*****' %}
                                         {% if book.average_rating > forloop.counter0 %}
-                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill text-warning"></i>
                                         {% else %}
-                                            <i class="bi bi-star"></i>
+                                            <i class="bi bi-star text-warning"></i>
                                         {% endif %}
                                     {% endfor %}
                                     ({{ book.total_ratings }} ratings)
@@ -38,23 +73,31 @@
                         </div>
                     </div>
                 {% empty %}
-                    <p>No books from friends available.</p>
+                    <div class="col-12">
+                        <p class="text-muted">No books from friends available.</p>
+                    </div>
                 {% endfor %}
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
+        <!-- Notifications Section -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Notifications</h2>
+                </div>
                 <div class="card-body">
-                    <h2 class="card-title">Notifications</h2>
-                    <div class="alert alert-info" role="alert">
-                        You have {{ friend_requests }} friend requests.
+                    <div class="alert alert-info d-flex align-items-center mb-2" role="alert">
+                        <i class="bi bi-person-plus-fill me-2"></i>
+                        <span>You have {{ friend_requests }} friend request{{ friend_requests|pluralize }}.</span>
                     </div>
-                    <div class="alert alert-info" role="alert">
-                        You have {{ book_requests }} book requests.
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="bi bi-book-fill me-2"></i>
+                        <span>You have {{ book_requests }} book request{{ book_requests|pluralize }}.</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

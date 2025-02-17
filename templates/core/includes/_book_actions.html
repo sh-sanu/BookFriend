@@ -4,4 +4,19 @@
         <a href="{% url 'core:book_ratings' book.id %}" class="btn btn-sm btn-info">View Ratings</a>
         <a href="{% url 'core:book_request' book.id %}" class="btn btn-sm btn-primary">Request Book</a>
         <a href="{% url 'core:library' book.owner.username %}" class="btn btn-sm btn-secondary">View Full Library</a>
-    </div>
+        <p class="card-text">
+            <i class="bi bi-hand-thumbs-up"></i> {{ book.likes }}
+            <i class="bi bi-hand-thumbs-down"></i> {{ book.dislikes }}
+        </p>
+        <p class="card-text">
+            Rating:
+            {% for i in '*****' %}
+                {% if book.average_rating > forloop.counter0 %}
+                    <i class="bi bi-star-fill"></i>
+                {% else %}
+                    <i class="bi bi-star"></i>
+                {% endif %}
+            {% endfor %}
+            ({{ book.total_ratings }} ratings)
+        </p>
+</div>
