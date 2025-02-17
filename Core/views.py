@@ -529,12 +529,24 @@ def search(request):
     if query:
         if search_type in ["all", "users"]:
             # Search for users by username, first name, or last name
-            users = (
-                User.objects.filter(
-                    Q(username__icontains=query)
-                    | Q(first_name__icontains=query)
-                    | Q(last_name__icontains=query)
+            # Split query into parts for combined name matching
+            query_parts = query.split()
+            
+            # Base query for username/email/individual name parts
+            base_query = Q(username__icontains=query) | Q(email__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
+            
+            # Add combined name matching if query has two parts
+            if len(query_parts) == 2:
+                base_query |= (
+                    Q(first_name__icontains=query_parts[0]) &
+                    Q(last_name__icontains=query_parts[1])
+                ) | (
+                    Q(first_name__icontains=query_parts[1]) &
+                    Q(last_name__icontains=query_parts[0])
                 )
+            
+            users = (
+                User.objects.filter(base_query)
                 .exclude(id=request.user.id)
                 .distinct()
                 .select_related('userprofile')
