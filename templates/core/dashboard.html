@@ -8,7 +8,7 @@
             <h2>Friends' Books</h2>
             <div class="row">
                 {% for book in friend_books %}
-                    <div class="col-md-4">
+                    <div class="col-sm-6 col-md-4">
                         <div class="card mb-4">
                             <a href="{% url 'core:book_detail' book.id %}">
                                 <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}">
@@ -19,11 +19,26 @@
                                 </h5>
                                 <p class="card-text">Owner: <a href="{% url 'core:profile' book.owner.username %}">{{ book.owner.username }}</a></p>
                                 <div class="btn-group" role="group">
-                                    <a href="{% url 'core:book_like' book.id %}" class="btn btn-sm btn-success">Like</a>
-                                    <a href="{% url 'core:book_dislike' book.id %}" class="btn btn-sm btn-warning">Dislike</a>
+                                    <a href="{% url 'core:book_like' book.id %}" class="btn btn-sm btn-success" title="Like"><i class="bi bi-hand-thumbs-up"></i></a>
+                                    <a href="{% url 'core:book_dislike' book.id %}" class="btn btn-sm btn-warning" title="Dislike"><i class="bi bi-hand-thumbs-down"></i></a>
                                     <a href="{% url 'core:book_ratings' book.id %}" class="btn btn-sm btn-info">View Ratings</a>
                                     <a href="{% url 'core:book_request' book.id %}" class="btn btn-sm btn-primary">Request Book</a>
                                 </div>
+                                <p class="card-text">
+                                    <i class="bi bi-hand-thumbs-up"></i> {{ book.likes }}
+                                    <i class="bi bi-hand-thumbs-down"></i> {{ book.dislikes }}
+                                </p>
+                                <p class="card-text">
+                                    Rating:
+                                    {% for i in '*****' %}
+                                        {% if book.average_rating > forloop.counter0 %}
+                                            <i class="bi bi-star-fill"></i>
+                                        {% else %}
+                                            <i class="bi bi-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    ({{ book.total_ratings }} ratings)
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -34,9 +49,17 @@
         </div>
 
         <div class="col-md-4">
-            <h2>Notifications</h2>
-            <p>You have {{ friend_requests }} friend requests.</p>
-            <p>You have {{ book_requests }} book requests.</p>
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Notifications</h2>
+                    <div class="alert alert-info" role="alert">
+                        You have {{ friend_requests }} friend requests.
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        You have {{ book_requests }} book requests.
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

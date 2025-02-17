@@ -666,6 +666,20 @@ def dashboard(request):
         .order_by("-created_at")[:12]
     )
 
+    for book in friend_books:
+        likes = book.bookrating_set.filter(rating='like').count()
+        dislikes = book.bookrating_set.filter(rating='dislike').count()
+        total_ratings = likes + dislikes
+        
+        if total_ratings > 0:
+            book.average_rating = round((likes / total_ratings) * 5, 1)  # Scale to 5 stars
+        else:
+            book.average_rating = 0
+        
+        book.likes = likes
+        book.dislikes = dislikes
+        book.total_ratings = total_ratings
+
     # Get pending friend requests
     friend_requests = Friendship.objects.filter(
         receiver=request.user, status="pending"
