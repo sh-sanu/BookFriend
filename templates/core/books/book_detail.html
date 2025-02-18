@@ -6,7 +6,7 @@
     <!-- Main Content Column -->
     <div class="col-lg-8">
       <!-- Book Details Card -->
-      <div class="card mb-4">
+      <div class="card mb-4 shadow-sm border-0 rounded">
         <div class="row g-0">
           <div class="col-md-4">
             <img 
@@ -21,15 +21,19 @@
               <p class="card-text mb-1"><strong>Author:</strong> {{ book.author }}</p>
               <p class="card-text mb-1"><strong>Genre:</strong> {{ book.genre }}</p>
               <p class="card-text">{{ book.description }}</p>
-              {% include 'core/includes/_book_actions.html' %}
+              <p class="card-text text-muted"><small>Added by {{ book.owner.username }} on {{ book.created_at|date:"M d, Y" }}</small></p>
+              <!-- Request Button -->
+              <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-book"></i> Request Book
+              </a>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Reviews Section -->
-      <div class="card mb-4">
-        <div class="card-header">
+      <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
           <h2 class="h5 mb-0">Reviews</h2>
         </div>
         <div class="card-body">
@@ -63,8 +67,8 @@
       </div>
 
       <!-- Submit Review Section -->
-      <div class="card mb-4">
-        <div class="card-header">
+      <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-success text-white">
           <h2 class="h5 mb-0">Submit a Review</h2>
         </div>
         <div class="card-body">
@@ -72,7 +76,7 @@
             <form method="post" action="{% url 'core:submit_review' book.id %}">
               {% csrf_token %}
               {{ form.as_p }}
-              <button type="submit" class="btn btn-primary">Submit Review</button>
+              <button type="submit" class="btn btn-success">Submit Review</button>
             </form>
           {% else %}
             <p class="text-muted">You must be friends with the book owner to submit a review.</p>
@@ -83,14 +87,13 @@
 
     <!-- Sidebar Column -->
     <div class="col-lg-4">
-      <div class="card mb-4">
-        <div class="card-body">
+      <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body text-center">
           <a href="{% url 'core:library' book.owner.username %}" class="btn btn-outline-primary w-100">
-            Back to Library
+            See full library of {{ book.owner.username }}
           </a>
         </div>
       </div>
-      <!-- Additional sidebar content can be added here if needed -->
     </div>
   </div>
 </div>
