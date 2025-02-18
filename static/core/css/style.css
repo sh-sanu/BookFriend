@@ -61,6 +61,13 @@ body {
     margin-top: 10px;
 }
 
+/* Disabled button styling */
+.btn[disabled] {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Add your custom styles here */
 .notification-badge {
     font-size: 0.7rem;
