@@ -579,6 +579,7 @@ def search(request):
                 else:
                     friendship_status[user.id] = None
 
+            context = {}
             if friendship_status:
                 context['friendship_status'] = friendship_status
 
@@ -750,7 +751,7 @@ def friend_remove(request, username):
         # Create notification for the other user
         Notification.objects.create(
             user=friend,
-            notification_type="friend_request",
+            notification_type="friend_request", # Should be friend_remove or similar
             message=f"{request.user.username} has removed you from their friends list.",
             related_user=request.user
         )
