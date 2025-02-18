@@ -109,6 +109,11 @@ def profile_view(request, username):
         "is_friend": is_friend,
         "pending_request": pending_request,
     }
+    
+    # Get recently added books by the user
+    recent_books = Book.objects.filter(owner=user).order_by('-created_at')[:6]
+    context['recent_books'] = recent_books
+
     return render(request, "core/profile/view.html", context)
 
 
@@ -574,6 +579,9 @@ def search(request):
                 else:
                     friendship_status[user.id] = None
 
+            if friendship_status:
+                context['friendship_status'] = friendship_status
+
         if search_type in ["all", "books"]:
             # Get friend IDs
             friend_ids = Friendship.objects.filter(
@@ -593,13 +601,13 @@ def search(request):
                 available=True,
             ).select_related("owner")
 
-    context = {
-        "query": query,
-        "search_type": search_type,
-        "users": users,
-        "books": books,
-        "friendship_status": friendship_status if 'friendship_status' in locals() else {},
-    }
+            context['books'] = books
+
+
+    context['query'] = query
+    context['search_type'] = search_type
+    context['users'] = users
+
     return render(request, "core/search/results.html", context)
 
 
@@ -780,6 +788,7 @@ def book_detail(request, book_id):
         'form': form,
         'is_friend': is_friend,
         'borrowing_history': borrowing_history,
+        'is_owner': request.user == book.owner, # Add is_owner to context
     }
     book.has_pending_request = BookRequest.has_pending_request(book, request.user)
     return render(request, 'core/books/book_detail.html', context)

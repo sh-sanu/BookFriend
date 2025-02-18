@@ -4,82 +4,111 @@
 {% block title %}{{ profile_user.get_full_name }} - Book Friend{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                {% if profile.profile_picture %}
-                    <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="rounded-circle img-fluid mb-3" style="max-width: 200px;">
-                {% else %}
-                    <img src="{% static 'core/images/default-profile.png' %}" alt="Default Profile Picture" class="rounded-circle img-fluid mb-3" style="max-width: 200px;">
-                {% endif %}
-                <h3 class="card-title">{{ profile_user.get_full_name }}</h3>
-                <p class="text-muted">@{{ profile_user.username }}</p>
-                
-                <div class="d-grid gap-2">
-                    {% if is_owner %}
-                        <a href="{% url 'core:profile_edit' %}" class="btn btn-primary">Edit Profile</a>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <!-- Profile Card Section -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    {% if profile.profile_picture %}
+                        <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="img-fluid rounded-circle mb-3" style="max-width: 150px; height: auto;">
                     {% else %}
-                        {% if not is_friend and not pending_request %}
-                            <form method="post" action="{% url 'core:friend_add' profile_user.username %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-primary">Send Friend Request</button>
-                            </form>
-                        {% elif pending_request %}
-                            <button class="btn btn-secondary" disabled>Friend Request Pending</button>
-                        {% endif %}
+                        <img src="{% static 'core/images/default-profile.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle mb-3" style="max-width: 150px; height: auto;">
                     {% endif %}
-                    <!-- Add Library Button -->
-                    <a href="{% url 'core:library' username=profile_user.username %}" class="btn btn-outline-primary">
-                        View Library
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body">
-                <h4>About</h4>
-                <p>{{ profile.bio|linebreaks|default:"No bio available." }}</p>
-                
-                <h4 class="mt-4">Details</h4>
-                <ul class="list-unstyled">
-                    {% if profile.birthplace %}
-                        <li><strong>Birthplace:</strong> {{ profile.birthplace }}</li>
-                    {% endif %}
-                    {% if profile.current_residence %}
-                        <li><strong>Current Residence:</strong> {{ profile.current_residence }}</li>
-                    {% endif %}
-                    {% if profile.occupation %}
-                        <li><strong>Occupation:</strong> {{ profile.occupation }}</li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 
-{% if not is_owner %}
-    <div class="card mt-3">
-        <div class="card-body">
-            {% if is_friend %}
-                <div class="d-flex justify-content-between align-items-center">
-                    <p class="text-success mb-0">You are friends</p>
-                    <form method="post" action="{% url 'core:friend_remove' profile_user.username %}" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this friend?');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Unfriend</button>
-                    </form>
+                    <h3 class="card-title">{{ profile_user.get_full_name }}</h3>
+                    <p class="text-muted">@{{ profile_user.username }}</p>
+
+                    <div class="d-grid gap-2">
+                        {% if is_owner %}
+                            <a href="{% url 'core:profile_edit' %}" class="btn btn-primary">Edit Profile</a>
+                        {% else %}
+                            {% if not is_friend and not pending_request %}
+                                <form method="post" action="{% url 'core:friend_add' profile_user.username %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">Send Friend Request</button>
+                                </form>
+                            {% elif pending_request %}
+                                <button class="btn btn-secondary" disabled>Friend Request Pending</button>
+                            {% endif %}
+                        {% endif %}
+                        <a href="{% url 'core:library' username=profile_user.username %}" class="btn btn-outline-primary">View Library</a>
+                    </div>
                 </div>
-            {% elif pending_request %}
-                <p class="text-muted mb-0">Friend request pending</p>
+            </div>
+        </div>
+
+        <!-- About and Details Section -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-3">About</h4>
+                    <p>{{ profile.bio|linebreaks|default:"No bio available." }}</p>
+
+                    <h4 class="mt-4">Details</h4>
+                    <ul class="list-group list-group-flush">
+                        {% if profile.birthplace %}
+                            <li class="list-group-item"><strong>Birthplace:</strong> {{ profile.birthplace }}</li>
+                        {% endif %}
+                        {% if profile.current_residence %}
+                            <li class="list-group-item"><strong>Current Residence:</strong> {{ profile.current_residence }}</li>
+                        {% endif %}
+                        {% if profile.occupation %}
+                            <li class="list-group-item"><strong>Occupation:</strong> {{ profile.occupation }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recently Added Books Section -->
+    <div class="card mt-4 shadow-sm">
+        <div class="card-body">
+            <h4 class="mb-3">Recently Added Books</h4>
+            {% if recent_books %}
+                <div class="row row-cols-2 row-cols-md-3 g-3">
+                    {% for book in recent_books %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <img src="{{ book.cover_image.url }}" class="card-img-top book-cover" alt="{{ book.title }}" style="height: 200px; object-fit: cover;">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title text-truncate">{{ book.title }}</h6>
+                                    <p class="card-text"><small class="text-muted">By {{ book.author }}</small></p>
+                                </div>
+                                <a href="{% url 'core:book_detail' book.id %}" class="stretched-link"></a>
+                                <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-book"></i> Request Book
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             {% else %}
-                <form method="post" action="{% url 'core:friend_add' profile_user.username %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary">Send Friend Request</button>
-                </form>
+                <p class="text-muted">No books added yet.</p>
             {% endif %}
         </div>
     </div>
-{% endif %}
-{% endblock %} 
+
+    {% if not is_owner %}
+        <div class="card mt-3 shadow-sm">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                {% if is_friend %}
+                    <p class="text-success mb-0">You are friends</p>
+                    <form method="post" action="{% url 'core:friend_remove' profile_user.username %}" onsubmit="return confirm('Are you sure you want to remove this friend?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Unfriend</button>
+                    </form>
+                {% elif pending_request %}
+                    <p class="text-muted mb-0">Friend request pending</p>
+                {% else %}
+                    <form method="post" action="{% url 'core:friend_add' profile_user.username %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Send Friend Request</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
