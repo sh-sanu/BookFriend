@@ -46,7 +46,6 @@
                       <strong>{{ review.user.username }}</strong>
                       <small class="text-muted"> - {{ review.created_at|date:"M d, Y" }}</small>
                     </div>
-                    <span class="badge bg-secondary">{{ review.rating }}/5 Stars</span>
                   </div>
                   {% if review.review_text %}
                     <p class="mt-2 mb-1">{{ review.review_text }}</p>
@@ -75,7 +74,14 @@
           {% if is_friend %}
             <form method="post" action="{% url 'core:submit_review' book.id %}">
               {% csrf_token %}
-              {{ form.as_p }}
+              <div class="mb-3">
+                <textarea
+                  name="review_text"
+                  class="form-control"
+                  placeholder="Write your review..."
+                  rows="3"
+                ></textarea>
+              </div>
               <button type="submit" class="btn btn-success">Submit Review</button>
             </form>
           {% else %}

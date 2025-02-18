@@ -781,29 +781,25 @@ def submit_review(request, book_id):
         return redirect('core:book_detail', book_id=book_id)
 
     if request.method == 'POST':
-        form = BookReviewForm(request.POST)
-        if form.is_valid():
+        review_text = request.POST.get('review_text', '').strip()
+        if review_text:
             review = BookReview.objects.create(
                 user=request.user,
                 book=book,
-                rating=form.cleaned_data['rating'],
-                review_text=form.cleaned_data['review_text']
+                review_text=review_text
             )
 
             # Create notification for book owner
             Notification.objects.create(
                 user=book.owner,
                 notification_type='book_review',
-                message=f"{request.user.username} reviewed your book '{book.title}'.",
+                message=f"{request.user.username} reviewed your book '{book.title}'",
                 related_book_review=review
             )
-
             messages.success(request, "Review submitted successfully!")
-            return redirect('core:book_detail', book_id=book_id)
         else:
-            messages.error(request, "Invalid review data.")
-            return redirect('core:book_detail', book_id=book_id)
-    else:
+            messages.error(request, "Review text cannot be empty")
+        
         return redirect('core:book_detail', book_id=book_id)
 
 @login_required

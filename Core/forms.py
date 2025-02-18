@@ -23,13 +23,8 @@ class BookForm(forms.ModelForm):
         fields = ['title', 'author', 'genre', 'condition', 'cover_image', 'description', 'available']
 
 class BookReviewForm(forms.Form):
-    rating = forms.ChoiceField(
-        choices=BookReview.RATING_CHOICES,
-        label="Rating",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
     review_text = forms.CharField(
-        label="Review (Optional)",
+        label="Review",
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-        required=False
+        required=True
     )
