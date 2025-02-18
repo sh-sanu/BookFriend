@@ -15,23 +15,26 @@
                 <div class="list-group">
                     {% for request in received_requests %}
                         <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-1">{{ request.sender.get_full_name }}</h5>
-                                    <p class="mb-1 text-muted">@{{ request.sender.username }}</p>
-                                </div>
-                                <div class="btn-group">
-                                    <form method="post" action="{% url 'core:friend_accept' request.id %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-success">Accept</button>
-                                    </form>
-                                    <form method="post" action="{% url 'core:friend_decline' request.id %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-danger">Decline</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="{{ request.sender.userprofile.profile_picture.url }}" alt="Profile Picture" class="profile-picture me-2">
+                                                            <div>
+                                                                <h5 class="mb-1">{{ request.sender.get_full_name }}</h5>
+                                                                <p class="mb-1 text-muted">@{{ request.sender.username }}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="btn-group">
+                                                            <form method="post" action="{% url 'core:friend_accept' request.id %}" class="d-inline">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                                                            </form>
+                                                            <form method="post" action="{% url 'core:friend_decline' request.id %}" class="d-inline">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-sm btn-danger">Decline</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
                     {% endfor %}
                 </div>
             {% else %}
@@ -46,14 +49,17 @@
                 <div class="list-group">
                     {% for request in sent_requests %}
                         <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-1">{{ request.receiver.get_full_name }}</h5>
-                                    <p class="mb-1 text-muted">@{{ request.receiver.username }}</p>
-                                    <small class="text-muted">Sent {{ request.created_at|timesince }} ago</small>
-                                </div>
-                            </div>
-                        </div>
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="{{ request.receiver.userprofile.profile_picture.url }}" alt="Profile Picture" class="profile-picture me-2">
+                                                            <div>
+                                                                <h5 class="mb-1">{{ request.receiver.get_full_name }}</h5>
+                                                                <p class="mb-1 text-muted">@{{ request.receiver.username }}</p>
+                                                                <small class="text-muted">Sent {{ request.created_at|timesince }} ago</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                     {% endfor %}
                 </div>
             {% else %}
