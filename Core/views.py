@@ -760,11 +760,18 @@ def book_detail(request, book_id):
         status="accepted",
     ).exists()
 
+    # Get borrowing history (only returned requests)
+    borrowing_history = BookRequest.objects.filter(
+        book=book,
+        status='returned'
+    ).order_by('-returned_at').select_related('borrower')
+
     context = {
         'book': book,
         'reviews': reviews,
         'form': form,
         'is_friend': is_friend,
+        'borrowing_history': borrowing_history,
     }
     return render(request, 'core/books/book_detail.html', context)
 

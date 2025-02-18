@@ -36,7 +36,8 @@
           </div>
         </div>
       </div>
-
+    
+    
       <!-- Reviews Section -->
       <div class="card mb-4 shadow-sm border-0">
         <div class="card-header bg-primary text-white">
@@ -106,7 +107,43 @@
           </a>
         </div>
       </div>
+      <!-- Borrowing History Section -->
+      {% if request.user == book.owner or is_friend %}
+      <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-info text-white">
+          <h2 class="h5 mb-0">Borrowing History</h2>
+        </div>
+        <div class="card-body">
+          {% if borrowing_history %}
+            <div class="list-group">
+              {% for request in borrowing_history %}
+              <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>{{ request.borrower.get_full_name|default:request.borrower.username }}</strong>
+                    <div class="text-muted small">
+                      Borrowed: {{ request.created_at|date:"M d, Y" }}
+                      | Expected return: {{ request.return_date|date:"M d, Y" }}
+                    </div>
+                  </div>
+                  <div class="text-end">
+                    <div class="text-success small">
+                      Returned: {{ request.returned_at|date:"M d, Y" }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">No borrowing history available for this book.</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
+
+
 {% endblock %}
