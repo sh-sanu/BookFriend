@@ -114,6 +114,7 @@
                         Shared By: <a href="{% url 'core:profile' book.owner.username %}" class="text-muted">
                                 {{ book.owner.username }}
                         </a>
+                        On {{ book.created_at|date:"M d, Y" }}
                         </p>
                         <!-- Action Buttons with wider layout -->
                         <div class="d-flex gap-2 mb-2">

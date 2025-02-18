@@ -20,8 +20,8 @@
               <h1 class="card-title">{{ book.title }}</h1>
               <p class="card-text mb-1"><strong>Author:</strong> {{ book.author }}</p>
               <p class="card-text mb-1"><strong>Genre:</strong> {{ book.genre }}</p>
-              <p class="card-text">{{ book.description }}</p>
-              <p class="card-text text-muted"><small>Added by {{ book.owner.username }} on {{ book.created_at|date:"M d, Y" }}</small></p>
+              <p class="card-text mb-1">{{ book.description }}</p>
+              <p class="card-text mb-3"><small>Added by {{ book.owner.username }} on {{ book.created_at|date:"M d, Y" }}</small></p>
               <!-- Request Button -->
               <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm">
                 <i class="bi bi-book"></i> Request Book

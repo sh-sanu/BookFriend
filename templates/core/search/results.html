@@ -5,12 +5,13 @@
 {% block title %}Search - Book Friend{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container my-5">
+    <!-- Page Heading -->
     <h1 class="mb-4">Search</h1>
 
-    <!-- Search Form -->
+    <!-- ==================== Search Form Section ==================== -->
     <form method="get" class="mb-4">
-        <div class="row g-3">
+        <div class="row g-3 align-items-center">
             <div class="col-md-6">
                 <input type="text" name="q" class="form-control" value="{{ query }}" placeholder="Search users or books..." required>
             </div>
@@ -26,17 +27,17 @@
             </div>
         </div>
     </form>
+    <!-- =============================================================== -->
 
     {% if query %}
         {% if search_type == 'all' or search_type == 'users' %}
-            <!-- Users Results -->
             {% if users %}
                 <h2 class="mb-3">Users</h2>
                 <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
                     {% for user in users %}
                         <div class="col">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
+                            <div class="card h-100 text-center">
+                                <div class="card-body">
                                     {% if user.userprofile.profile_picture %}
                                         <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.get_full_name }}" 
                                              class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
@@ -46,22 +47,9 @@
                                     {% endif %}
                                     <h5 class="card-title">{{ user.get_full_name }}</h5>
                                     <p class="text-muted">@{{ user.username }}</p>
-                                    <p class="text-muted small">{{ user.email }}</p>
-                                    <div class="d-flex flex-column gap-2">
-                                        <div class="btn-group">
-                                            <a href="{% url 'core:profile' username=user.username %}" class="btn btn-primary btn-sm">View Profile</a>
-                                            <a href="{% url 'core:library' username=user.username %}" class="btn btn-outline-primary btn-sm">View Library</a>
-                                        </div>
-                                        {% if friendship_status|get_item:user.id == None %}
-                                            <form method="post" action="{% url 'core:friend_add' username=user.username %}" class="mt-2">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-success btn-sm w-100">Add Friend</button>
-                                            </form>
-                                        {% elif friendship_status|get_item:user.id == 'pending' %}
-                                            <button class="btn btn-secondary btn-sm w-100" disabled>Friend Request Sent</button>
-                                        {% elif friendship_status|get_item:user.id == 'accepted' %}
-                                            <button class="btn btn-success btn-sm w-100" disabled>Friends</button>
-                                        {% endif %}
+                                    <div class="btn-group">
+                                        <a href="{% url 'core:profile' username=user.username %}" class="btn btn-primary btn-sm">View Profile</a>
+                                        <a href="{% url 'core:library' username=user.username %}" class="btn btn-outline-primary btn-sm">View Library</a>
                                     </div>
                                 </div>
                             </div>
@@ -74,7 +62,6 @@
         {% endif %}
 
         {% if search_type == 'all' or search_type == 'books' %}
-            <!-- Books Results -->
             {% if books %}
                 <h2 class="mb-3">Books</h2>
                 <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -106,10 +93,8 @@
             {% endif %}
         {% endif %}
 
-        {% if not users and not books and query %}
-            <div class="alert alert-info">
-                No results found for "{{ query }}"
-            </div>
+        {% if not users and not books %}
+            <div class="alert alert-info">No results found for "{{ query }}"</div>
         {% endif %}
     {% endif %}
 </div>
