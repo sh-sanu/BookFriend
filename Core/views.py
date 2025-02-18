@@ -140,6 +140,8 @@ def library_view(request, username):
         "books": books,
         "is_owner": request.user == user,
     }
+    for book in books:
+        book.has_pending_request = BookRequest.has_pending_request(book, request.user)
     return render(request, "core/library/view.html", context)
 
 
@@ -318,6 +320,11 @@ def book_request(request, book_id):
         )
         return redirect("core:library", username=book.owner.username)
 
+    # Check for existing pending request
+    if BookRequest.has_pending_request(book, request.user):
+        messages.error(request, "You have already requested this book.")
+        return redirect(request.META.get('HTTP_REFERER', 'core:dashboard'))
+
     if request.method == "POST":
         return_date = request.POST.get("return_date")
         try:
@@ -435,9 +442,9 @@ def book_request_decline(request, request_id):
         )
 
         messages.success(request, "Book request declined.")
-        return redirect("core:book_requests")
+        return redirect(request.META.get('HTTP_REFERER', 'core:dashboard'))
 
-    return redirect("core:book_requests")
+    return redirect(request.META.get('HTTP_REFERER', 'core:dashboard'))
 
 
 @login_required
@@ -686,6 +693,7 @@ def dashboard(request):
     )
 
     for book in friend_books:
+        book.has_pending_request = BookRequest.has_pending_request(book, request.user)
         likes = book.bookrating_set.filter(rating='like').count()
         dislikes = book.bookrating_set.filter(rating='dislike').count()
         total_ratings = likes + dislikes
@@ -773,6 +781,7 @@ def book_detail(request, book_id):
         'is_friend': is_friend,
         'borrowing_history': borrowing_history,
     }
+    book.has_pending_request = BookRequest.has_pending_request(book, request.user)
     return render(request, 'core/books/book_detail.html', context)
 
 @login_required

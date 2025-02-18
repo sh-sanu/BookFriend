@@ -3,7 +3,11 @@
         <a href="{% url 'core:book_dislike' book.id %}" class="btn btn-sm btn-warning" title="Dislike"><i class="bi bi-hand-thumbs-down"></i></a>
         <a href="{% url 'core:book_ratings' book.id %}" class="btn btn-sm btn-info">View Ratings</a>
         {% if book.available %}
-          <a href="{% url 'core:book_request' book.id %}" class="btn btn-sm btn-primary">Request Book</a>
+            {% if book.has_pending_request %}
+                <button class="btn btn-sm btn-warning" disabled>Pending</button>
+            {% else %}
+                <a href="{% url 'core:book_request' book.id %}" class="btn btn-sm btn-primary">Request Book</a>
+            {% endif %}
         {% else %}
           <button class="btn btn-sm btn-secondary" disabled>Not Available</button>
         {% endif %}

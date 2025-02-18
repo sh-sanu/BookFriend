@@ -101,6 +101,10 @@ class BookRequest(models.Model):
     def __str__(self):
         return f"{self.borrower.username} requests {self.book.title}"
 
+    @staticmethod
+    def has_pending_request(book, user):
+        return BookRequest.objects.filter(book=book, borrower=user, status='pending').exists()
+
 class Notification(models.Model):
     TYPE_CHOICES = [
         ('friend_request', 'Friend Request'),
