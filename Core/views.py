@@ -535,9 +535,13 @@ def search(request):
     query = request.GET.get("q", "")
     search_type = request.GET.get("type", "all")
     
-    context = {} # Initialize context here
-    users = []
-    books = []
+    context = {
+        'query': query,
+        'search_type': search_type,
+        'users': [],
+        'books': [],
+        'friendship_status': {}
+    }
 
     if query:
         if search_type in ["all", "users"]:
@@ -580,9 +584,7 @@ def search(request):
                 else:
                     friendship_status[user.id] = None
 
-            context = {}
-            if friendship_status:
-                context['friendship_status'] = friendship_status
+            context['friendship_status'] = friendship_status
 
         if search_type in ["all", "books"]:
             # Get friend IDs
@@ -606,8 +608,6 @@ def search(request):
             context['books'] = books
 
 
-    context['query'] = query
-    context['search_type'] = search_type
     context['users'] = users
 
     return render(request, "core/search/results.html", context)

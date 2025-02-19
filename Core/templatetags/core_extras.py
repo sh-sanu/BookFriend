@@ -8,4 +8,6 @@ def split(value, arg):
 
 @register.filter
 def get_item(dictionary, key):
-    return dictionary.get(str(key)) if isinstance(key, int) else dictionary.get(key)
+    if isinstance(key, str) and key.isdigit():
+        key = int(key)
+    return dictionary.get(key)
