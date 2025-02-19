@@ -68,7 +68,15 @@ body {
   pointer-events: none;
 }
 
-/* Add your custom styles here */
+/* Custom styles */
 .notification-badge {
     font-size: 0.7rem;
-} 
+}
+
+.book-cover-small {
+    height: 60px; /* Adjust size as needed */
+    width: auto;
+    object-fit: contain; /* or cover, depending on desired effect */
+    display: block; /* Prevents inline spacing issues */
+    margin-right: 10px; /* Space between cover and text */
+}

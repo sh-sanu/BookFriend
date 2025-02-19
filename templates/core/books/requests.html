@@ -4,104 +4,140 @@
 {% block title %}Book Requests - Book Friend{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">Book Requests</h1>
+<div class="container my-5">
+    <h1 class="mb-4 text-center">Book Requests</h1>
 
-    <!-- Active Borrows -->
-    <h2 class="mb-3">Active Borrows</h2>
-    {% if active_borrows %}
-        <div class="list-group mb-4">
-            {% for borrow in active_borrows %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">{{ borrow.book.title }}</h5>
-                            {% if borrow.borrower == request.user %}
-                                <p class="mb-1">Borrowed from: {{ borrow.book.owner.get_full_name }}</p>
-                            {% else %}
-                                <p class="mb-1">Borrowed by: {{ borrow.borrower.get_full_name }}</p>
-                            {% endif %}
-                            <small class="text-muted">Borrowed on: {{ borrow.created_at|date:"F d, Y" }}</small><br>
-                            <small class="text-muted">Return by: {{ borrow.return_date|date:"F d, Y" }}</small>
-                        </div>
-                        {% if request.user == borrow.book.owner %}
-                        <form method="post" action="{% url 'core:book_return' borrow.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-success btn-sm">Mark as Returned</button>
-                        </form>
-                        {% endif %}
+    <!-- Active Borrows Section -->
+    <section class="mb-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h5 mb-0">Active Borrows</h2>
+            </div>
+            <div class="card-body">
+                {% if active_borrows %}
+                    <div class="list-group list-group-flush">
+                        {% for borrow in active_borrows %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex">
+                                        <img src="{{ borrow.book.cover_image.url }}" alt="{{ borrow.book.title }} Cover" class="book-cover-small img-thumbnail me-3" style="max-width: 80px; max-height: 120px; object-fit: cover;">
+                                        <div>
+                                            <h5 class="mb-1">{{ borrow.book.title }}</h5>
+                                            {% if borrow.borrower == request.user %}
+                                                <p class="mb-1">Borrowed from: {{ borrow.book.owner.get_full_name }}</p>
+                                            {% else %}
+                                                <p class="mb-1">Borrowed by: {{ borrow.borrower.get_full_name }}</p>
+                                            {% endif %}
+                                            <small class="text-muted">Borrowed on: {{ borrow.created_at|date:"F d, Y" }}</small><br>
+                                            <small class="text-muted">Return by: {{ borrow.return_date|date:"F d, Y" }}</small>
+                                        </div>
+                                    </div>
+                                    {% if request.user == borrow.book.owner %}
+                                    <form method="post" action="{% url 'core:book_return' borrow.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success btn-sm">Mark as Returned</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                </div>
-            {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No active borrows.</p>
+                {% endif %}
+            </div>
         </div>
-    {% else %}
-        <p class="text-muted mb-4">No active borrows.</p>
-    {% endif %}
+    </section>
 
-    <!-- Received Requests -->
-    <h2 class="mb-3">Received Requests</h2>
-    {% if received_requests %}
-        <div class="list-group mb-4">
-            {% for request in received_requests %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">{{ request.book.title }}</h5>
-                            <p class="mb-1">Requested by: {{ request.borrower.get_full_name }}</p>
-                            <small class="text-muted">Requested on: {{ request.created_at|date:"F d, Y" }}</small><br>
-                            <small class="text-muted">Return by: {{ request.return_date|date:"F d, Y" }}</small>
-                        </div>
-                        <div class="btn-group">
-                            <form method="post" action="{% url 'core:book_request_accept' request.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-success btn-sm">Accept</button>
-                            </form>
-                            <form method="post" action="{% url 'core:book_request_decline' request.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger btn-sm">Decline</button>
-                            </form>
-                        </div>
+    <!-- Received Requests Section -->
+    <section class="mb-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h2 class="h5 mb-0">Received Requests</h2>
+            </div>
+            <div class="card-body">
+                {% if received_requests %}
+                    <div class="list-group list-group-flush">
+                        {% for request in received_requests %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex">
+                                        <img src="{{ request.book.cover_image.url }}" alt="{{ request.book.title }} Cover" class="book-cover-small img-thumbnail me-3" style="max-width: 80px; max-height: 120px; object-fit: cover;">
+                                        <div>
+                                            <h5 class="mb-1">{{ request.book.title }}</h5>
+                                            <p class="mb-1">Requested by: {{ request.borrower.get_full_name }}</p>
+                                            <small class="text-muted">Requested on: {{ request.created_at|date:"F d, Y" }}</small><br>
+                                            <small class="text-muted">Return by: {{ request.return_date|date:"F d, Y" }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="btn-group">
+                                        <form method="post" action="{% url 'core:book_request_accept' request.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                                        </form>
+                                        <form method="post" action="{% url 'core:book_request_decline' request.id %}" class="d-inline ms-2">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                </div>
-            {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No pending requests received.</p>
+                {% endif %}
+            </div>
         </div>
-    {% else %}
-        <p class="text-muted mb-4">No pending requests received.</p>
-    {% endif %}
+    </section>
 
-    <!-- Sent Requests -->
-    <h2 class="mb-3">Sent Requests</h2>
-    {% if sent_pending_requests or sent_returned_requests %}
-        <div class="list-group">
-            {% for request in sent_pending_requests %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">{{ request.book.title }}</h5>
-                            <p class="mb-1">Owner: {{ request.book.owner.get_full_name }}</p>
-                            <small class="text-muted">Requested on: {{ request.created_at|date:"F d, Y" }}</small><br>
-                            <small class="text-muted">Return by: {{ request.return_date|date:"F d, Y" }}</small>
-                        </div>
-                        <span class="badge bg-warning">Pending</span>
+    <!-- Sent Requests Section -->
+    <section>
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h2 class="h5 mb-0">Sent Requests</h2>
+            </div>
+            <div class="card-body">
+                {% if sent_pending_requests or sent_returned_requests %}
+                    <div class="list-group list-group-flush">
+                        {% for request in sent_pending_requests %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex">
+                                        <img src="{{ request.book.cover_image.url }}" alt="{{ request.book.title }} Cover" class="book-cover-small img-thumbnail me-3" style="max-width: 80px; max-height: 120px; object-fit: cover;">
+                                        <div>
+                                            <h5 class="mb-1">{{ request.book.title }}</h5>
+                                            <p class="mb-1">Owner: {{ request.book.owner.get_full_name }}</p>
+                                            <small class="text-muted">Requested on: {{ request.created_at|date:"F d, Y" }}</small><br>
+                                            <small class="text-muted">Return by: {{ request.return_date|date:"F d, Y" }}</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-warning">Pending</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        {% for request in sent_returned_requests %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex">
+                                        <img src="{{ request.book.cover_image.url }}" alt="{{ request.book.title }} Cover" class="book-cover-small img-thumbnail me-3" style="max-width: 80px; max-height: 120px; object-fit: cover;">
+                                        <div>
+                                            <h5 class="mb-1">{{ request.book.title }}</h5>
+                                            <p class="mb-1">Owner: {{ request.book.owner.get_full_name }}</p>
+                                            <small class="text-muted">Borrowed on: {{ request.created_at|date:"F d, Y" }}</small><br>
+                                            <small class="text-muted">Returned on: {{ request.returned_at|date:"F d, Y" }}</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success">Returned</span>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                </div>
-            {% endfor %}
-            {% for request in sent_returned_requests %}
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">{{ request.book.title }}</h5>
-                            <p class="mb-1">Owner: {{ request.book.owner.get_full_name }}</p>
-                            <small class="text-muted">Borrowed on: {{ request.created_at|date:"F d, Y" }}</small><br>
-                            <small class="text-muted">Returned on: {{ request.returned_at|date:"F d, Y" }}</small>
-                        </div>
-                        <span class="badge bg-success">Returned</span>
-                    </div>
-                </div>
-            {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No requests sent.</p>
+                {% endif %}
+            </div>
         </div>
-    {% else %}
-        <p class="text-muted">No requests sent.</p>
-    {% endif %}
+    </section>
 </div>
-{% endblock %} 
+{% endblock %}
