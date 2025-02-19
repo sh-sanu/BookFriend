@@ -534,7 +534,8 @@ def notifications_api(request):
 def search(request):
     query = request.GET.get("q", "")
     search_type = request.GET.get("type", "all")
-
+    
+    context = {} # Initialize context here
     users = []
     books = []
 
