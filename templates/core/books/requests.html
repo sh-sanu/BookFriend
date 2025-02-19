@@ -20,13 +20,15 @@
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="d-flex">
-                                        <img src="{{ borrow.book.cover_image.url }}" alt="{{ borrow.book.title }} Cover" class="book-cover-small img-thumbnail me-3" style="max-width: 80px; max-height: 120px; object-fit: cover;">
+                                        <a href="{% url 'core:book_detail' borrow.book.id %}" class="text-decoration-none">
+                                            <img src="{{ borrow.book.cover_image.url }}" alt="{{ borrow.book.title }} Cover" class="book-cover-small img-thumbnail me-3" style="max-width: 80px; max-height: 120px; object-fit: cover;">
+                                        </a>
                                         <div>
-                                            <h5 class="mb-1">{{ borrow.book.title }}</h5>
+                                            <h5 class="mb-1"><a href="{% url 'core:book_detail' borrow.book.id %}" class="text-decoration-none text-dark">{{ borrow.book.title }}</a></h5>
                                             {% if borrow.borrower == request.user %}
-                                                <p class="mb-1">Borrowed from: {{ borrow.book.owner.get_full_name }}</p>
+                                                <p class="mb-1">Borrowed from: <a href="{% url 'core:profile' borrow.book.owner.username %}" class="text-decoration-none text-dark">{{ borrow.book.owner.get_full_name }}</a></p>
                                             {% else %}
-                                                <p class="mb-1">Borrowed by: {{ borrow.borrower.get_full_name }}</p>
+                                                <p class="mb-1">Borrowed by: <a href="{% url 'core:profile' borrow.borrower.username %}" class="text-decoration-none text-dark">{{ borrow.borrower.get_full_name }}</a></p>
                                             {% endif %}
                                             <small class="text-muted">Borrowed on: {{ borrow.created_at|date:"F d, Y" }}</small><br>
                                             <small class="text-muted">Return by: {{ borrow.return_date|date:"F d, Y" }}</small>
@@ -104,10 +106,12 @@
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="d-flex">
-                                        <img src="{{ request.book.cover_image.url }}" alt="{{ request.book.title }} Cover" class="book-cover-small img-thumbnail me-3" style="max-width: 80px; max-height: 120px; object-fit: cover;">
+                                        <a href="{% url 'core:book_detail' request.book.id %}" class="text-decoration-none">
+                                            <img src="{{ request.book.cover_image.url }}" alt="{{ request.book.title }} Cover" class="book-cover-small img-thumbnail me-3" style="max-width: 80px; max-height: 120px; object-fit: cover;">
+                                        </a>
                                         <div>
-                                            <h5 class="mb-1">{{ request.book.title }}</h5>
-                                            <p class="mb-1">Owner: {{ request.book.owner.get_full_name }}</p>
+                                            <h5 class="mb-1"><a href="{% url 'core:book_detail' request.book.id %}" class="text-decoration-none text-dark">{{ request.book.title }}</a></h5>
+                                            <p class="mb-1">Owner: <a href="{% url 'core:profile' request.book.owner.username %}" class="text-decoration-none text-dark">{{ request.book.owner.get_full_name }}</a></p>
                                             <small class="text-muted">Requested on: {{ request.created_at|date:"F d, Y" }}</small><br>
                                             <small class="text-muted">Return by: {{ request.return_date|date:"F d, Y" }}</small>
                                         </div>
@@ -122,7 +126,7 @@
                                     <div class="d-flex">
                                         <img src="{{ request.book.cover_image.url }}" alt="{{ request.book.title }} Cover" class="book-cover-small img-thumbnail me-3" style="max-width: 80px; max-height: 120px; object-fit: cover;">
                                         <div>
-                                            <h5 class="mb-1">{{ request.book.title }}</h5>
+                                            <h5 class="mb-1"><a href="{% url 'core:book_detail' request.book.id %}" class="text-decoration-none text-dark">{{ request.book.title }}</a></h5>
                                             <p class="mb-1">Owner: {{ request.book.owner.get_full_name }}</p>
                                             <small class="text-muted">Borrowed on: {{ request.created_at|date:"F d, Y" }}</small><br>
                                             <small class="text-muted">Returned on: {{ request.returned_at|date:"F d, Y" }}</small>
