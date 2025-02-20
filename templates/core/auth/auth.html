@@ -26,6 +26,9 @@
                         <label for="login-password" class="form-label">Password</label>
                         <input type="password" name="password" id="login-password" class="form-control" required>
                     </div>
+                    <div class="mb-3 text-start">
+                        <a href="{% url 'core:password_reset' %}" class="text-decoration-none">Forgot Password?</a>
+                    </div>
                     <button type="submit" class="btn btn-primary w-100">Login</button>
                 </form>
             </div>
@@ -76,10 +79,6 @@
             </div>
         </div>
     </div>
-</div>
-
-<div class="mt-3 text-center">
-    <a href="{% url 'core:password_reset' %}" class="text-decoration-none">Forgot Password?</a>
 </div>
 
 <style>
