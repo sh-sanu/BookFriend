@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-app_name = "core"
+app_name = 'core'
 
 urlpatterns = [
     # Authentication
@@ -10,7 +10,10 @@ urlpatterns = [
     path("signup/", views.signup_view, name="signup"),
     path("logout/", views.logout_view, name="logout"),
     # Profile
-    path("profile/edit/", views.profile_edit, name="profile_edit"),
+    path('profile/edit/', views.profile_edit, name='profile_edit'),
+    path('password/change/', views.password_change, name='password_change'),
+    path('password/reset/', views.password_reset, name='password_reset'),
+    path('password/reset/verify/', views.password_reset_verify, name='password_reset_verify'),
     path("profile/<str:username>/", views.profile_view, name="profile"),
     # Dashboard
     path("dashboard/", views.dashboard, name="dashboard"),

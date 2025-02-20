@@ -1,15 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import SignUpForm, UserProfileForm, BookForm, BookReviewForm
+from .forms_auth import CustomPasswordChangeForm, PasswordResetRequestForm, PasswordResetVerificationForm
 from .models import UserProfile, Book, Friendship, Notification, BookRequest, BookRating, BookReview
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.urls import reverse
+import random
+import string
 
 
 def landing_page(request):
@@ -144,6 +147,80 @@ def profile_edit(request):
         form = UserProfileForm(instance=profile)
 
     return render(request, "core/profile/edit.html", {"form": form})
+
+@login_required
+def password_change(request):
+    if request.method == 'POST':
+        form = CustomPasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('core:profile_edit')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = CustomPasswordChangeForm(user=request.user)
+    return render(request, 'core/auth/password_change.html', {'form': form})
+
+def password_reset(request):
+    if request.method == 'POST':
+        form = PasswordResetRequestForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            user = User.objects.get(email=email)
+            
+            # Generate a random 6-digit code
+            code = ''.join(random.choices(string.digits, k=6))
+            
+            # Store the code and expiry time in session
+            request.session['reset_code'] = code
+            request.session['reset_email'] = email
+            request.session['reset_expiry'] = (timezone.now() + timedelta(minutes=15)).isoformat()
+            
+            # TODO: Send email with reset code
+            # For development, just show the code in a message
+            messages.info(request, f'Your reset code is: {code}')
+            
+            return redirect('core:password_reset_verify')
+    else:
+        form = PasswordResetRequestForm()
+    return render(request, 'core/auth/password_reset.html', {'form': form})
+
+def password_reset_verify(request):
+    if 'reset_code' not in request.session or 'reset_email' not in request.session:
+        messages.error(request, 'Please request a new reset code.')
+        return redirect('core:password_reset')
+        
+    if request.method == 'POST':
+        form = PasswordResetVerificationForm(request.POST)
+        if form.is_valid():
+            # Check if code is expired
+            expiry = datetime.fromisoformat(request.session['reset_expiry'])
+            if timezone.now() > expiry:
+                messages.error(request, 'Reset code has expired. Please request a new one.')
+                return redirect('core:password_reset')
+            
+            # Verify the code
+            if form.cleaned_data['code'] != request.session['reset_code']:
+                messages.error(request, 'Invalid reset code.')
+                return render(request, 'core/auth/password_reset_verify.html', {'form': form})
+            
+            # Reset the password
+            user = User.objects.get(email=request.session['reset_email'])
+            user.set_password(form.cleaned_data['new_password1'])
+            user.save()
+            
+            # Clean up session
+            del request.session['reset_code']
+            del request.session['reset_email']
+            del request.session['reset_expiry']
+            
+            messages.success(request, 'Your password has been reset successfully. You can now login with your new password.')
+            return redirect('core:login')
+    else:
+        form = PasswordResetVerificationForm()
+    return render(request, 'core/auth/password_reset_verify.html', {'form': form})
 
 
 @login_required
