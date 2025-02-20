@@ -47,22 +47,22 @@
                                     {% endif %}
                                     <h5 class="card-title">{{ user.get_full_name }}</h5>
                                     <p class="text-muted">@{{ user.username }}</p>
-                                    <div class="btn-group w-100 mb-2">
+                                    <div class="btn-group">
                                         <a href="{% url 'core:profile' username=user.username %}" class="btn btn-primary btn-sm">View Profile</a>
                                         <a href="{% url 'core:library' username=user.username %}" class="btn btn-outline-primary btn-sm">View Library</a>
                                     </div>
-                                    <div class="w-100">
+                                    <div class="mt-2">
                                         {% if friendship_status|get_item:user.id == 'accepted' %}
-                                            <form method="post" action="{% url 'core:friend_remove' user.username %}" class="d-inline w-100" onsubmit="return confirm('Are you sure you want to remove this friend?');">
+                                            <form method="post" action="{% url 'core:friend_remove' user.username %}" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this friend?');">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-outline-danger btn-sm w-100">Unfriend</button>
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">Unfriend</button>
                                             </form>
                                         {% elif friendship_status and friendship_status|get_item:user.id == 'pending' %}
-                                            <button class="btn btn-secondary btn-sm w-100" disabled>Friend Request Pending</button>
+                                            <button class="btn btn-secondary btn-sm" disabled>Friend Request Pending</button>
                                         {% else %}
-                                            <form method="post" action="{% url 'core:friend_add' user.username %}" class="d-inline w-100">
+                                            <form method="post" action="{% url 'core:friend_add' user.username %}" class="d-inline">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-outline-primary btn-sm w-100">Add Friend</button>
+                                                <button type="submit" class="btn btn-outline-primary btn-sm">Add Friend</button>
                                             </form>
                                         {% endif %}
                                     </div>
