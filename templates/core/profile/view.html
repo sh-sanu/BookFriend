@@ -20,20 +20,27 @@
                     <h3 class="card-title">{{ profile_user.get_full_name }}</h3>
                     <p class="text-muted">@{{ profile_user.username }}</p>
 
-                    <div class="d-grid gap-2">
-                        {% if is_owner %}
-                            <a href="{% url 'core:profile_edit' %}" class="btn btn-primary">Edit Profile</a>
-                        {% else %}
-                            {% if not is_friend and not pending_request %}
-                                <form method="post" action="{% url 'core:friend_add' profile_user.username %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary">Send Friend Request</button>
-                                </form>
-                            {% elif pending_request %}
-                                <button class="btn btn-secondary" disabled>Friend Request Pending</button>
+                    <!-- Action Buttons -->
+                    <div class="mb-3">
+                        <div class="btn-group w-100 mb-3">
+                            <a href="{% url 'core:profile' username=profile_user.username %}" class="btn btn-outline-primary">View Profile</a>
+                            <a href="{% url 'core:library' username=profile_user.username %}" class="btn btn-outline-primary">View Library</a>
+                        </div>
+
+                        <div class="d-grid">
+                            {% if is_owner %}
+                                <a href="{% url 'core:profile_edit' %}" class="btn btn-primary">Edit Profile</a>
+                            {% else %}
+                                {% if not is_friend and not pending_request %}
+                                    <form method="post" action="{% url 'core:friend_add' profile_user.username %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary w-100">Send Friend Request</button>
+                                    </form>
+                                {% elif pending_request %}
+                                    <button class="btn btn-secondary w-100" disabled>Friend Request Pending</button>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                        <a href="{% url 'core:library' username=profile_user.username %}" class="btn btn-outline-primary">View Library</a>
+                        </div>
                     </div>
                 </div>
             </div>
