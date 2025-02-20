@@ -112,7 +112,17 @@ def profile_view(request, username):
     
     # Get recently added books by the user
     recent_books = Book.objects.filter(owner=user).order_by('-created_at')[:6]
+    
+    # Get book request status for each book
+    book_request_status = {}
+    for book in recent_books:
+        if BookRequest.has_pending_request(book, request.user):
+            book_request_status[book.id] = 'pending'
+        else:
+            book_request_status[book.id] = None
+    
     context['recent_books'] = recent_books
+    context['book_request_status'] = book_request_status
 
     return render(request, "core/profile/view.html", context)
 
@@ -140,13 +150,20 @@ def profile_edit(request):
 def library_view(request, username):
     user = get_object_or_404(User, username=username)
     books = Book.objects.filter(owner=user).order_by("-created_at")
+    # Get book request status for each book
+    book_request_status = {}
+    for book in books:
+        if BookRequest.has_pending_request(book, request.user):
+            book_request_status[book.id] = 'pending'
+        else:
+            book_request_status[book.id] = None
+
     context = {
         "library_owner": user,
         "books": books,
         "is_owner": request.user == user,
+        "book_request_status": book_request_status
     }
-    for book in books:
-        book.has_pending_request = BookRequest.has_pending_request(book, request.user)
     return render(request, "core/library/view.html", context)
 
 
@@ -540,7 +557,8 @@ def search(request):
         'search_type': search_type,
         'users': [],
         'books': [],
-        'friendship_status': {}
+        'friendship_status': {},
+        'book_request_status': {}
     }
 
     if query:
@@ -585,6 +603,7 @@ def search(request):
                     friendship_status[user.id] = None
 
             context['friendship_status'] = friendship_status
+            context['users'] = users
 
         if search_type in ["all", "books"]:
             # Get friend IDs
@@ -605,10 +624,18 @@ def search(request):
                 available=True,
             ).select_related("owner")
 
+            # Get book request status for each book
+            book_request_status = {}
+            for book in books:
+                if BookRequest.has_pending_request(book, request.user):
+                    book_request_status[book.id] = 'pending'
+                else:
+                    book_request_status[book.id] = None
+
             context['books'] = books
+            context['book_request_status'] = book_request_status
 
 
-    context['users'] = users
 
     return render(request, "core/search/results.html", context)
 
@@ -727,10 +754,19 @@ def dashboard(request):
         book__owner=request.user, status="pending"
     ).count()
 
+    # Get book request status for each book
+    book_request_status = {}
+    for book in friend_books:
+        if BookRequest.has_pending_request(book, request.user):
+            book_request_status[book.id] = 'pending'
+        else:
+            book_request_status[book.id] = None
+
     context = {
         "friend_books": friend_books,
         "friend_requests": friend_requests,
         "book_requests": book_requests,
+        "book_request_status": book_request_status
     }
     return render(request, "core/dashboard.html", context)
 
@@ -784,10 +820,18 @@ def book_detail(request, book_id):
         status='returned'
     ).order_by('-returned_at').select_related('borrower')
 
+    # Get book request status
+    book_request_status = {}
+    if BookRequest.has_pending_request(book, request.user):
+        book_request_status[book.id] = 'pending'
+    else:
+        book_request_status[book.id] = None
+
     context = {
         'book': book,
         'reviews': reviews,
         'form': form,
+        'book_request_status': book_request_status,
         'is_friend': is_friend,
         'borrowing_history': borrowing_history,
         'is_owner': request.user == book.owner, # Add is_owner to context

@@ -97,7 +97,15 @@
                                         <strong>Genre:</strong> {{ book.genre }}<br>
                                         <strong>Owner:</strong> {{ book.owner.get_full_name }}
                                     </p>
-                                    <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm">Request Book</a>
+                                    {% if book_request_status|get_item:book.id == 'pending' %}
+                                        <button class="btn btn-secondary btn-sm" disabled>
+                                            <i class="bi bi-book"></i> Request Pending
+                                        </button>
+                                    {% else %}
+                                        <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-book"></i> Request Book
+                                        </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

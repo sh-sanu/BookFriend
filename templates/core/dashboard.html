@@ -1,4 +1,6 @@
 {% extends 'core/base.html' %}
+{% load static %}
+{% load core_extras %}
 
 {% block content %}
 <style>
@@ -126,9 +128,21 @@
                             </a>
                         </div>
                         <!-- Full-width Request Button -->
-                        <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm w-100">
-                            <i class="bi bi-book"></i> Request Book
-                        </a>
+                        {% if book.available %}
+                            {% if book_request_status|get_item:book.id == 'pending' %}
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    <i class="bi bi-book"></i> Request Pending
+                                </button>
+                            {% else %}
+                                <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-book"></i> Request Book
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                <i class="bi bi-x-circle"></i> Not Available
+                            </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>

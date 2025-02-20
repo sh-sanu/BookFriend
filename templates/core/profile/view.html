@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load core_extras %}
 
 {% block title %}{{ profile_user.get_full_name }} - Book Friend{% endblock %}
 
@@ -77,9 +78,21 @@
                                     <p class="card-text"><small class="text-muted">By {{ book.author }}</small></p>
                                 </div>
                                 <a href="{% url 'core:book_detail' book.id %}" class="stretched-link"></a>
-                                <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm w-100">
-                                    <i class="bi bi-book"></i> Request Book
-                                </a>
+                                {% if book.id in pending_book_requests %}
+                                    <button class="btn btn-secondary btn-sm w-100" disabled>
+                                        <i class="bi bi-book"></i> Request Pending
+                                    </button>
+                                {% else %}
+                                    {% if book_request_status|get_item:book.id == 'pending' %}
+                                        <button class="btn btn-secondary btn-sm w-100" disabled>
+                                            <i class="bi bi-book"></i> Request Pending
+                                        </button>
+                                    {% else %}
+                                        <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm w-100">
+                                            <i class="bi bi-book"></i> Request Book
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}

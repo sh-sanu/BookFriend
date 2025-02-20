@@ -1,4 +1,6 @@
 {% extends 'core/base.html' %}
+{% load static %}
+{% load core_extras %}
 
 {% block content %}
 <div class="container my-4">
@@ -24,9 +26,15 @@
               <p class="card-text mb-3"><small>Added by {{ book.owner.username }} on {{ book.created_at|date:"M d, Y" }}</small></p>
               <!-- Request Button -->
               {% if book.available %}
-                <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm">
-                  <i class="bi bi-book"></i> Request Book
-                </a>
+                {% if book_request_status|get_item:book.id == 'pending' %}
+                  <button class="btn btn-secondary btn-sm" disabled>
+                    <i class="bi bi-book"></i> Request Pending
+                  </button>
+                {% else %}
+                  <a href="{% url 'core:book_request' book.id %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-book"></i> Request Book
+                  </a>
+                {% endif %}
               {% else %}
                 <button class="btn btn-secondary btn-sm" disabled>
                   <i class="bi bi-x-circle"></i> Not Available
