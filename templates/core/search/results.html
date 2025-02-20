@@ -83,20 +83,24 @@
                     {% for book in books %}
                         <div class="col">
                             <div class="card h-100">
-                                {% if book.cover_image %}
-                                    <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}"
-                                         style="height: 200px; object-fit: cover;">
-                                {% else %}
-                                    <img src="{% static 'core/images/default_book.png' %}" class="card-img-top" alt="Default Book Cover"
-                                         style="height: 200px; object-fit: cover;">
-                                {% endif %}
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ book.title }}</h5>
-                                    <p class="card-text">
-                                        <strong>Author:</strong> {{ book.author }}<br>
-                                        <strong>Genre:</strong> {{ book.genre }}<br>
-                                        <strong>Owner:</strong> {{ book.owner.get_full_name }}
-                                    </p>
+                                <a href="{% url 'core:book_detail' book.id %}" class="text-decoration-none">
+                                    {% if book.cover_image %}
+                                        <img src="{{ book.cover_image.url }}" class="card-img-top" alt="{{ book.title }}"
+                                             style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                        <img src="{% static 'core/images/default_book.png' %}" class="card-img-top" alt="Default Book Cover"
+                                             style="height: 200px; object-fit: cover;">
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h5 class="card-title text-dark">{{ book.title }}</h5>
+                                        <p class="card-text text-dark">
+                                            <strong>Author:</strong> {{ book.author }}<br>
+                                            <strong>Genre:</strong> {{ book.genre }}<br>
+                                            <strong>Owner:</strong> <a href="{% url 'core:profile' username=book.owner.username %}" class="text-decoration-none text-primary">{{ book.owner.get_full_name }}</a>
+                                        </p>
+                                    </div>
+                                </a>
+                                <div class="card-footer">
                                     {% if book_request_status|get_item:book.id == 'pending' %}
                                         <button class="btn btn-secondary btn-sm" disabled>
                                             <i class="bi bi-book"></i> Request Pending

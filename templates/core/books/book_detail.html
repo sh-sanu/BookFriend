@@ -23,7 +23,7 @@
               <p class="card-text mb-1"><strong>Author:</strong> {{ book.author }}</p>
               <p class="card-text mb-1"><strong>Genre:</strong> {{ book.genre }}</p>
               <p class="card-text mb-1">{{ book.description }}</p>
-              <p class="card-text mb-3"><small>Added by {{ book.owner.username }} on {{ book.created_at|date:"M d, Y" }}</small></p>
+              <p class="card-text mb-3"><small>Added by <a href="{% url 'core:profile' username=book.owner.username %}" class="text-decoration-none text-primary">{{ book.owner.username }}</a> on {{ book.created_at|date:"M d, Y" }}</small></p>
               <!-- Request Button -->
               {% if book.available %}
                 {% if book_request_status|get_item:book.id == 'pending' %}
