@@ -1,5 +1,7 @@
 {% extends 'core/base.html' %}
 
+{% block messages %}{% endblock %}
+
 {% block title %}Chat with {{ friend.username }}{% endblock %}
 
 {% block content %}
@@ -11,13 +13,13 @@
         </div>
         
         <div class="card-body" style="height: 400px; overflow-y: auto;">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="mb-3 {% if message.sender == request.user %}text-end{% endif %}">
-                        <div class="d-inline-block p-2 rounded {% if message.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}" style="max-width: 70%;">
-                            <div class="message-content">{{ message.content|linebreaksbr }}</div>
-                            <small class="{% if message.sender == request.user %}text-white-50{% else %}text-muted{% endif %}">
-                                {{ message.timestamp|date:'M d, Y H:i' }}
+            {% if chat_messages %}
+                {% for chat_message in chat_messages %}
+                    <div class="mb-3 {% if chat_message.sender == request.user %}text-end{% endif %}">
+                        <div class="d-inline-block p-2 rounded {% if chat_message.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}" style="max-width: 70%;">
+                            <div class="message-content">{{ chat_message.content|linebreaksbr }}</div>
+                            <small class="{% if chat_message.sender == request.user %}text-white-50{% else %}text-muted{% endif %}">
+                                {{ chat_message.timestamp|date:'M d, Y H:i' }}
                             </small>
                         </div>
                     </div>

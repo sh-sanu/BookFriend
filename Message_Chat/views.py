@@ -56,7 +56,7 @@ def chat_view(request, username):
     
     context = {
         'friend': friend,
-        'messages': conversation,
+        'chat_messages': conversation,
         'form': form
     }
     
