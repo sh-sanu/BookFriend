@@ -41,7 +41,7 @@ def chat_view(request, username):
             message.sender = request.user
             message.receiver = friend
             message.save()
-            return redirect('message_chat:chat', username=username)
+            return redirect('message_chat:chat_detail', username=username)
     else:
         form = MessageForm()
     

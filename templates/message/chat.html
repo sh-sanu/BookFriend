@@ -5,41 +5,169 @@
 {% block title %}Chat with {{ friend.username }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Chat with {{ friend.username }}</h3>
-            <a href="{% url 'message_chat:chat_list' %}" class="btn btn-light btn-sm">Back to Chat List</a>
+<style>
+    .chat-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    .chat-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: linear-gradient(to right, #4a90e2, #357abd);
+        border-radius: 15px 15px 0 0;
+        padding: 1rem;
+    }
+    .chat-body {
+        height: calc(100vh - 250px);
+        overflow-y: auto;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+    }
+    .message-bubble {
+        max-width: 75%;
+        margin-bottom: 1.5rem;
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .message-sent {
+        margin-left: auto;
+        background: linear-gradient(to right, #007bff, #0056b3);
+        color: white;
+        border-radius: 20px 20px 5px 20px;
+        padding: 12px 20px;
+        order: 1;
+    }
+    .message-sent + .profile-picture {
+        order: 2;
+    }
+    .message-received {
+        background: white;
+        color: #333;
+        border-radius: 20px 20px 20px 5px;
+        padding: 12px 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .message-time {
+        font-size: 0.75rem;
+        margin-top: 5px;
+        opacity: 0.7;
+    }
+    .chat-composer {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 1rem;
+        border-top: 1px solid #dee2e6;
+        border-radius: 0 0 15px 15px;
+    }
+    .chat-input {
+        border-radius: 25px;
+        padding: 0.75rem 1.25rem;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    .chat-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        border-color: #80bdff;
+    }
+    .send-button {
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    .send-button:hover {
+        transform: scale(1.05);
+    }
+    .profile-picture {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    @media (max-width: 768px) {
+        .chat-body {
+            height: calc(100vh - 200px);
+        }
+        .message-bubble {
+            max-width: 85%;
+        }
+        .profile-picture {
+            width: 30px;
+            height: 30px;
+        }
+    }
+</style>
+
+<div class="chat-container mt-4">
+    <div class="card border-0 shadow-sm">
+        <div class="chat-header text-white d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                {% if friend.userprofile.profile_picture %}
+                    <img src="{{ friend.userprofile.profile_picture.url }}" alt="{{ friend.username }}" class="profile-picture me-2">
+                {% else %}
+                    <img src="/static/core/images/default-profile.png" alt="{{ friend.username }}" class="profile-picture me-2">
+                {% endif %}
+                <h3 class="mb-0">{{ friend.username }}</h3>
+            </div>
+            <a href="{% url 'message_chat:chat_list' %}" class="btn btn-light btn-sm d-flex align-items-center">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
         </div>
         
-        <div class="card-body" style="height: 400px; overflow-y: auto;">
+        <div class="chat-body" id="chatBody">
             {% if chat_messages %}
                 {% for chat_message in chat_messages %}
-                    <div class="mb-3 {% if chat_message.sender == request.user %}text-end{% endif %}">
-                        <div class="d-inline-block p-2 rounded {% if chat_message.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}" style="max-width: 70%;">
+                    <div class="message-bubble {% if chat_message.sender == request.user %}message-sent{% else %}message-received{% endif %}">
+                        {% if chat_message.sender.userprofile.profile_picture %}
+                            <img src="{{ chat_message.sender.userprofile.profile_picture.url }}" alt="{{ chat_message.sender.username }}" class="profile-picture">
+                        {% else %}
+                            <img src="/static/core/images/default-profile.png" alt="{{ chat_message.sender.username }}" class="profile-picture">
+                        {% endif %}
+                        <div>
                             <div class="message-content">{{ chat_message.content|linebreaksbr }}</div>
-                            <small class="{% if chat_message.sender == request.user %}text-white-50{% else %}text-muted{% endif %}">
-                                {{ chat_message.timestamp|date:'M d, Y H:i' }}
-                            </small>
+                            <div class="message-time {% if chat_message.sender == request.user %}text-white-50{% else %}text-muted{% endif %}">
+                                {{ chat_message.timestamp|date:'g:i A' }}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
             {% else %}
-                <div class="text-center text-muted">
-                    <p>No messages yet. Start the conversation!</p>
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-chat-dots fs-1 mb-3 d-block"></i>
+                    <p class="mb-0">No messages yet. Start the conversation!</p>
                 </div>
             {% endif %}
         </div>
         
-        <div class="card-footer">
+        <div class="chat-composer">
             <form method="post" class="mb-0">
                 {% csrf_token %}
                 <div class="input-group">
-                    {{ form.content }}
-                    <button type="submit" class="btn btn-primary">Send</button>
+                    <input type="text" name="content" class="form-control chat-input" placeholder="Type your message..." required>
+                    <button type="submit" class="btn btn-primary send-button ms-2">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
                 </div>
             </form>
         </div>
+    </div>
+</div>
+
+<script>
+    // Auto-scroll to bottom on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatBody = document.getElementById('chatBody');
+        chatBody.scrollTop = chatBody.scrollHeight;
+    });
+</script>
     </div>
 </div>
 {% endblock %}
