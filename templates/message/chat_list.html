@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Chat List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Your Conversations</h2>
+    
+    {% if friends %}
+        <div class="list-group">
+            {% for friend in friends %}
+                <a href="{% url 'message_chat:chat' friend.username %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">{{ friend.username }}</h5>
+                        <small class="text-muted">Click to chat</small>
+                    </div>
+                    {% if friend.received_messages.filter|dictsort:"is_read=False, receiver=request.user"|length > 0 %}
+                        <span class="badge bg-primary rounded-pill">New</span>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>You don't have any friends yet. Add friends to start chatting!</p>
+            <a href="{% url 'core:dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

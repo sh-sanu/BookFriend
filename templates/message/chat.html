@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Chat with {{ friend.username }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Chat with {{ friend.username }}</h3>
+            <a href="{% url 'message_chat:chat_list' %}" class="btn btn-light btn-sm">Back to Chat List</a>
+        </div>
+        
+        <div class="card-body" style="height: 400px; overflow-y: auto;">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-3 {% if message.sender == request.user %}text-end{% endif %}">
+                        <div class="d-inline-block p-2 rounded {% if message.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}" style="max-width: 70%;">
+                            <div class="message-content">{{ message.content|linebreaksbr }}</div>
+                            <small class="{% if message.sender == request.user %}text-white-50{% else %}text-muted{% endif %}">
+                                {{ message.timestamp|date:'M d, Y H:i' }}
+                            </small>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center text-muted">
+                    <p>No messages yet. Start the conversation!</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="card-footer">
+            <form method="post" class="mb-0">
+                {% csrf_token %}
+                <div class="input-group">
+                    {{ form.content }}
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
