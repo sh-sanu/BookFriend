@@ -75,28 +75,6 @@ def chat_view(request, username):
         messages.error(request, 'You can only chat with your friends.')
         return redirect('core:dashboard')
     
-    # Handle AJAX requests for message status updates
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        # Get conversation messages
-        conversation = Message.objects.filter(
-            (Q(sender=request.user, receiver=friend) | Q(sender=friend, receiver=request.user))
-        ).order_by('timestamp')
-        
-        # Mark messages as read
-        unread_messages = conversation.filter(receiver=request.user, is_read=False)
-        unread_messages.update(is_read=True)
-        
-        # Return message data including read status
-        messages_data = [{
-            'id': msg.id,
-            'content': msg.content,
-            'sender': msg.sender.username,
-            'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'is_read': msg.is_read
-        } for msg in conversation]
-        
-        return JsonResponse({'messages': messages_data})
-    
     # Handle message sending
     if request.method == 'POST':
         content = request.POST.get('content', '').strip()
@@ -113,7 +91,7 @@ def chat_view(request, username):
         (Q(sender=request.user, receiver=friend) | Q(sender=friend, receiver=request.user))
     ).order_by('timestamp')
     
-    # Mark messages as read
+    # Mark messages as read when receiver views them
     unread_messages = conversation.filter(receiver=request.user, is_read=False)
     unread_messages.update(is_read=True)
     

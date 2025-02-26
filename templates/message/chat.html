@@ -132,9 +132,7 @@
         <div class="chat-body" id="chatBody">
             {% if chat_messages %}
                 {% for chat_message in chat_messages %}
-                    <div class="message-bubble {% if chat_message.sender == request.user %}message-sent{% else %}message-received{% endif %}" 
-                         data-message-id="{{ chat_message.id }}" 
-                         data-timestamp="{{ chat_message.timestamp|date:'Y-m-d H:i:s' }}">
+                    <div class="message-bubble {% if chat_message.sender == request.user %}message-sent{% else %}message-received{% endif %}">
                         {% if chat_message.sender == request.user %}
                             {% if request.user.userprofile.profile_picture %}
                                 <img src="{{ request.user.userprofile.profile_picture.url }}" alt="{{ request.user.username }}" class="profile-picture">
@@ -192,37 +190,6 @@
     // Auto-scroll to bottom on page load
     const chatBody = document.getElementById('chatBody');
     chatBody.scrollTop = chatBody.scrollHeight;
-
-    // Function to check for new messages and update read status
-    function updateChat() {
-        const lastMessage = document.querySelector('.message-bubble:last-child');
-        if (lastMessage) {
-            const lastMessageTime = lastMessage.getAttribute('data-timestamp');
-            fetch(`{% url 'message_chat:chat_detail' friend.username %}?last_message=${lastMessageTime}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.messages) {
-                    // Update read status for messages
-                    data.messages.forEach(msg => {
-                        const messageElement = document.querySelector(`[data-message-id="${msg.id}"]`);
-                        if (messageElement && msg.is_read) {
-                            const readStatus = messageElement.querySelector('.read-status');
-                            if (readStatus) {
-                                readStatus.innerHTML = '<i class="bi bi-check2-all" title="Read"></i>';
-                            }
-                        }
-                    });
-                }
-            });
-        }
-    }
-
-    // Update chat every 5 seconds
-    setInterval(updateChat, 5000);
 </script>
 {% endblock %}
 {% endblock %}
