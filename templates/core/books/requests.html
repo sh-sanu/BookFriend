@@ -5,18 +5,18 @@
 
 {% block content %}
 <div class="container my-5">
-    <h1 class="mb-4 text-center">Book Requests</h1>
+    <h1 class="mb-4">Book Requests</h1>
 
-    <!-- Active Borrows Section -->
+    <!-- Books Borrowed From You Section -->
     <section class="mb-5">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
-                <h2 class="h5 mb-0">Active Borrows</h2>
+                <h2 class="h5 mb-0">Books Borrowed From You</h2>
             </div>
             <div class="card-body">
-                {% if active_borrows %}
+                {% if borrowed_from_you %}
                     <div class="list-group list-group-flush">
-                        {% for borrow in active_borrows %}
+                        {% for borrow in borrowed_from_you %}
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="d-flex">
@@ -25,27 +25,55 @@
                                         </a>
                                         <div>
                                             <h5 class="mb-1"><a href="{% url 'core:book_detail' borrow.book.id %}" class="text-decoration-none text-dark">{{ borrow.book.title }}</a></h5>
-                                            {% if borrow.borrower == request.user %}
-                                                <p class="mb-1">Borrowed from: <a href="{% url 'core:profile' borrow.book.owner.username %}" class="text-decoration-none text-dark">{{ borrow.book.owner.get_full_name }}</a></p>
-                                            {% else %}
-                                                <p class="mb-1">Borrowed by: <a href="{% url 'core:profile' borrow.borrower.username %}" class="text-decoration-none text-dark">{{ borrow.borrower.get_full_name }}</a></p>
-                                            {% endif %}
+                                            <p class="mb-1">Borrowed by: <a href="{% url 'core:profile' borrow.borrower.username %}" class="text-decoration-none text-dark">{{ borrow.borrower.get_full_name }}</a></p>
                                             <small class="text-muted">Borrowed on: {{ borrow.created_at|date:"F d, Y" }}</small><br>
                                             <small class="text-muted">Return by: {{ borrow.return_date|date:"F d, Y" }}</small>
                                         </div>
                                     </div>
-                                    {% if request.user == borrow.book.owner %}
                                     <form method="post" action="{% url 'core:book_return' borrow.id %}">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-success btn-sm">Mark as Returned</button>
                                     </form>
-                                    {% endif %}
                                 </div>
                             </div>
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p class="text-muted text-center">No active borrows.</p>
+                    <p class="text-muted text-center">No books currently borrowed from you.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Books Borrowed By You Section -->
+    <section class="mb-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h2 class="h5 mb-0">Books Borrowed By You</h2>
+            </div>
+            <div class="card-body">
+                {% if borrowed_by_you %}
+                    <div class="list-group list-group-flush">
+                        {% for borrow in borrowed_by_you %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex">
+                                        <a href="{% url 'core:book_detail' borrow.book.id %}" class="text-decoration-none">
+                                            <img src="{{ borrow.book.cover_image.url }}" alt="{{ borrow.book.title }} Cover" class="book-cover-small img-thumbnail me-3" style="max-width: 80px; max-height: 120px; object-fit: cover;">
+                                        </a>
+                                        <div>
+                                            <h5 class="mb-1"><a href="{% url 'core:book_detail' borrow.book.id %}" class="text-decoration-none text-dark">{{ borrow.book.title }}</a></h5>
+                                            <p class="mb-1">Borrowed from: <a href="{% url 'core:profile' borrow.book.owner.username %}" class="text-decoration-none text-dark">{{ borrow.book.owner.get_full_name }}</a></p>
+                                            <small class="text-muted">Borrowed on: {{ borrow.created_at|date:"F d, Y" }}</small><br>
+                                            <small class="text-muted">Return by: {{ borrow.return_date|date:"F d, Y" }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">No books currently borrowed by you.</p>
                 {% endif %}
             </div>
         </div>

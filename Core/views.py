@@ -475,17 +475,23 @@ def book_requests(request):
         status="returned"
     ).select_related("book", "book__owner")
 
-    # Get active borrows (both as owner and borrower)
-    active_borrows = BookRequest.objects.filter(
-        (Q(book__owner=request.user) | Q(borrower=request.user)), 
+    # Get active borrows split into two categories
+    borrowed_from_you = BookRequest.objects.filter(
+        book__owner=request.user,
         status="accepted"
-    ).select_related("book", "borrower", "book__owner")
+    ).select_related("book", "borrower")
+
+    borrowed_by_you = BookRequest.objects.filter(
+        borrower=request.user,
+        status="accepted"
+    ).select_related("book", "book__owner")
 
     context = {
         "received_requests": received_requests,
         "sent_pending_requests": sent_pending_requests,
         "sent_returned_requests": sent_returned_requests,
-        "active_borrows": active_borrows,
+        "borrowed_from_you": borrowed_from_you,
+        "borrowed_by_you": borrowed_by_you
     }
     return render(request, "core/books/requests.html", context)
 
