@@ -133,6 +133,21 @@ class Notification(models.Model):
     def __str__(self):
         return f"{self.notification_type} for {self.user.username}"
 
+    @staticmethod
+    def get_user_notifications(user):
+        """Get all notifications for a user except message notifications"""
+        return Notification.objects.filter(
+            user=user,
+            notification_type__in=[
+                'friend_request',
+                'book_request',
+                'request_update',
+                'due_reminder',
+                'book_rating',
+                'book_review'
+            ]
+        ).order_by('-created_at')
+
     def get_notification_url(self):
         if self.notification_type == 'friend_request':
             if self.related_friendship:

@@ -596,9 +596,7 @@ def notification_redirect(request, notification_id):
 
 @login_required
 def notifications_view(request):
-    notifications = Notification.objects.filter(user=request.user).order_by(
-        "-created_at"
-    )
+    notifications = Notification.get_user_notifications(request.user)
     unread_count = notifications.filter(read=False).count()
 
     # Mark all as read
@@ -617,9 +615,7 @@ def notifications_view(request):
 def notifications_api(request):
     """API endpoint for checking new notifications via AJAX"""
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
-        unread_count = Notification.objects.filter(
-            user=request.user, read=False
-        ).count()
+        unread_count = Notification.get_user_notifications(request.user).filter(read=False).count()
         return JsonResponse({"unread_count": unread_count})
     return HttpResponseBadRequest()
 
