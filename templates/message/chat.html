@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
 {% block messages %}{% endblock %}
 
@@ -113,7 +114,7 @@
                 {% if friend.userprofile.profile_picture %}
                     <img src="{{ friend.userprofile.profile_picture.url }}" alt="{{ friend.username }}" class="profile-picture me-2">
                 {% else %}
-                    <img src="/static/core/images/default-profile.png" alt="{{ friend.username }}" class="profile-picture me-2">
+                    <img src="{% static 'core/images/default-profile.png' %}" alt="{{ friend.username }}" class="profile-picture me-2">
                 {% endif %}
                 <h3 class="mb-0">{{ friend.username }}</h3>
             </div>
@@ -126,10 +127,18 @@
             {% if chat_messages %}
                 {% for chat_message in chat_messages %}
                     <div class="message-bubble {% if chat_message.sender == request.user %}message-sent{% else %}message-received{% endif %}">
-                        {% if chat_message.sender.userprofile.profile_picture %}
-                            <img src="{{ chat_message.sender.userprofile.profile_picture.url }}" alt="{{ chat_message.sender.username }}" class="profile-picture">
+                        {% if chat_message.sender == request.user %}
+                            {% if request.user.userprofile.profile_picture %}
+                                <img src="{{ request.user.userprofile.profile_picture.url }}" alt="{{ request.user.username }}" class="profile-picture">
+                            {% else %}
+                                <img src="{% static 'core/images/default-profile.png' %}" alt="{{ request.user.username }}" class="profile-picture">
+                            {% endif %}
                         {% else %}
-                            <img src="/static/core/images/default-profile.png" alt="{{ chat_message.sender.username }}" class="profile-picture">
+                            {% if friend.userprofile.profile_picture %}
+                                <img src="{{ friend.userprofile.profile_picture.url }}" alt="{{ friend.username }}" class="profile-picture">
+                            {% else %}
+                                <img src="{% static 'core/images/default-profile.png' %}" alt="{{ friend.username }}" class="profile-picture">
+                            {% endif %}
                         {% endif %}
                         <div>
                             <div class="message-content">{{ chat_message.content|linebreaksbr }}</div>
@@ -161,13 +170,11 @@
     </div>
 </div>
 
+{% block extra_js %}
 <script>
     // Auto-scroll to bottom on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const chatBody = document.getElementById('chatBody');
-        chatBody.scrollTop = chatBody.scrollHeight;
-    });
+    const chatBody = document.getElementById('chatBody');
+    chatBody.scrollTop = chatBody.scrollHeight;
 </script>
-    </div>
-</div>
+{% endblock %}
 {% endblock %}

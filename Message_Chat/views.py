@@ -3,23 +3,65 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q
+from django.http import JsonResponse
 from Core.models import Friendship
 from .models import Message
 from .forms import MessageForm
 
 @login_required
 def chat_list(request):
+    # Handle search query
+    search_query = request.GET.get('q', '')
+    
     # Get all friends of the current user
     friendships = Friendship.objects.filter(
         (Q(sender=request.user) | Q(receiver=request.user)),
         status='accepted'
     )
+    
     friends = []
     for friendship in friendships:
         friend = friendship.receiver if friendship.sender == request.user else friendship.sender
+        if search_query:
+            if search_query.lower() not in friend.username.lower():
+                continue
         friends.append(friend)
     
-    return render(request, 'message/chat_list.html', {'friends': friends})
+    # Get conversation data for each friend
+    conversations = []
+    for friend in friends:
+        messages = Message.objects.filter(
+            Q(sender=request.user, receiver=friend) |
+            Q(sender=friend, receiver=request.user)
+        ).order_by('-timestamp')
+        
+        if messages.exists():
+            last_message = messages.first()
+            unread_count = messages.filter(sender=friend, receiver=request.user, is_read=False).count()
+            conversations.append({
+                'friend': friend,
+                'last_message': last_message,
+                'unread_count': unread_count
+            })
+        else:
+            conversations.append({
+                'friend': friend,
+                'last_message': None,
+                'unread_count': 0
+            })
+    
+    # Sort conversations by last message timestamp
+    conversations.sort(
+        key=lambda x: x['last_message'].timestamp if x['last_message'] else x['friend'].date_joined,
+        reverse=True
+    )
+    
+    context = {
+        'conversations': conversations,
+        'search_query': search_query,
+        'total_unread': Message.get_unread_count(request.user)
+    }
+    return render(request, 'message/chat_list.html', context)
 
 @login_required
 def chat_view(request, username):
@@ -35,15 +77,14 @@ def chat_view(request, username):
     
     # Handle message sending
     if request.method == 'POST':
-        form = MessageForm(request.POST)
-        if form.is_valid():
-            message = form.save(commit=False)
-            message.sender = request.user
-            message.receiver = friend
-            message.save()
+        content = request.POST.get('content', '').strip()
+        if content:
+            Message.objects.create(
+                sender=request.user,
+                receiver=friend,
+                content=content
+            )
             return redirect('message_chat:chat_detail', username=username)
-    else:
-        form = MessageForm()
     
     # Get conversation messages
     conversation = Message.objects.filter(
@@ -57,7 +98,12 @@ def chat_view(request, username):
     context = {
         'friend': friend,
         'chat_messages': conversation,
-        'form': form
     }
     
     return render(request, 'message/chat.html', context)
+
+@login_required
+def get_unread_count(request):
+    """AJAX endpoint to get unread message count"""
+    count = Message.get_unread_count(request.user)
+    return JsonResponse({'unread_count': count})

@@ -49,37 +49,85 @@
         border-radius: 15px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
+    .last-message {
+        color: #6c757d;
+        font-size: 0.875rem;
+        max-width: 250px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .search-container {
+        margin-bottom: 1.5rem;
+    }
+    .search-input {
+        border-radius: 25px;
+        padding: 0.75rem 1.25rem;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    .search-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        border-color: #80bdff;
+    }
 </style>
 
 <div class="chat-list-container">
     <div class="chat-list-header">
-        <h2 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Your Conversations</h2>
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Your Conversations</h2>
+            {% if total_unread > 0 %}
+                <span class="badge bg-light text-primary">{{ total_unread }} unread</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="search-container">
+        <form method="get" class="d-flex">
+            <input type="text" name="q" class="form-control search-input" placeholder="Search conversations..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-primary ms-2">
+                <i class="bi bi-search"></i>
+            </button>
+        </form>
     </div>
     
-    {% if friends %}
+    {% if conversations %}
         <div class="chat-list">
-            {% for friend in friends %}
-                <a href="{% url 'message_chat:chat_detail' friend.username %}" class="card chat-list-card text-decoration-none">
+            {% for conv in conversations %}
+                <a href="{% url 'message_chat:chat_detail' conv.friend.username %}" class="card chat-list-card text-decoration-none">
                     <div class="card-body d-flex align-items-center justify-content-between p-3">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center flex-grow-1">
                             <div class="chat-avatar">
-                                {% if friend.userprofile.profile_picture %}
-                                    <img src="{{ friend.userprofile.profile_picture.url }}" alt="{{ friend.username }}">
+                                {% if conv.friend.userprofile.profile_picture %}
+                                    <img src="{{ conv.friend.userprofile.profile_picture.url }}" alt="{{ conv.friend.username }}">
                                 {% else %}
                                     <img src="{% static 'core/images/default-profile.png' %}" alt="Default Profile">
                                 {% endif %}
                             </div>
-                            <div class="ms-3">
-                                <h5 class="mb-1 text-dark">{{ friend.username }}</h5>
-                                <small class="text-muted d-flex align-items-center">
-                                    <i class="bi bi-circle-fill me-1 fs-6"></i>
-                                    Online
-                                </small>
+                            <div class="ms-3 flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-1 text-dark">{{ conv.friend.username }}</h5>
+                                    {% if conv.last_message %}
+                                        <small class="text-muted">{{ conv.last_message.timestamp|timesince }} ago</small>
+                                    {% endif %}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <p class="last-message mb-0">
+                                        {% if conv.last_message %}
+                                            {% if conv.last_message.sender == request.user %}
+                                                <i class="bi bi-reply me-1"></i>
+                                            {% endif %}
+                                            {{ conv.last_message.content }}
+                                        {% else %}
+                                            No messages yet
+                                        {% endif %}
+                                    </p>
+                                    {% if conv.unread_count > 0 %}
+                                        <span class="badge unread-badge ms-2">{{ conv.unread_count }}</span>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-                        {% if friend.received_messages.filter|dictsort:"is_read=False, receiver=request.user"|length > 0 %}
-                            <span class="badge unread-badge">New Messages</span>
-                        {% endif %}
                     </div>
                 </a>
             {% endfor %}
@@ -95,4 +143,49 @@
         </div>
     {% endif %}
 </div>
+
+{% block extra_js %}
+<script>
+    // Function to update unread count in navbar
+    function updateUnreadCount() {
+        fetch('{% url "message_chat:get_unread_count" %}')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('#message-unread-badge');
+                if (badge) {
+                    if (data.unread_count > 0) {
+                        badge.textContent = data.unread_count;
+                        badge.style.display = 'inline';
+                        // Update total unread count in header if it exists
+                        const totalUnreadSpan = document.querySelector('.chat-list-header .badge');
+                        if (totalUnreadSpan) {
+                            totalUnreadSpan.textContent = `${data.unread_count} unread`;
+                        }
+                        // Play notification sound if enabled
+                        playNotificationSound();
+                    } else {
+                        badge.style.display = 'none';
+                        // Remove total unread count in header if it exists
+                        const totalUnreadSpan = document.querySelector('.chat-list-header .badge');
+                        if (totalUnreadSpan) {
+                            totalUnreadSpan.remove();
+                        }
+                    }
+                }
+            });
+    }
+
+    // Function to play notification sound
+    function playNotificationSound() {
+        const audio = new Audio('/static/core/sounds/notification.mp3');
+        audio.play().catch(e => console.log('Error playing sound:', e));
+    }
+
+    // Update unread count every 30 seconds
+    setInterval(updateUnreadCount, 30000);
+
+    // Initial unread count check
+    updateUnreadCount();
+</script>
+{% endblock %}
 {% endblock %}

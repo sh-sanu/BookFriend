@@ -112,7 +112,8 @@ class Notification(models.Model):
         ('request_update', 'Request Update'),
         ('due_reminder', 'Due Reminder'),
         ('book_rating', 'Book Rating'),
-        ('book_review', 'Book Review'), # Added book review notification type
+        ('book_review', 'Book Review'),
+        ('new_message', 'New Message'),
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -126,11 +127,12 @@ class Notification(models.Model):
     related_book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True, blank=True)
     related_book_request = models.ForeignKey(BookRequest, on_delete=models.SET_NULL, null=True, blank=True)
     related_friendship = models.ForeignKey(Friendship, on_delete=models.SET_NULL, null=True, blank=True)
-    related_book_review = models.ForeignKey('BookReview', on_delete=models.SET_NULL, null=True, blank=True) # Added book review relation
-    
+    related_book_review = models.ForeignKey('BookReview', on_delete=models.SET_NULL, null=True, blank=True)
+    related_message = models.ForeignKey('Message_Chat.Message', on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications')
+
     def __str__(self):
         return f"{self.notification_type} for {self.user.username}"
-        
+
     def get_notification_url(self):
         if self.notification_type == 'friend_request':
             if self.related_friendship:
@@ -161,9 +163,14 @@ class Notification(models.Model):
                 return reverse('core:library', kwargs={'username': self.related_book.owner.username})
             return reverse('core:dashboard')
             
-        elif self.notification_type == 'book_review': # Added book review notification redirect
+        elif self.notification_type == 'book_review':
             if self.related_book_review:
                 return reverse('core:book_detail', kwargs={'book_id': self.related_book_review.book.id})
             return reverse('core:dashboard')
+            
+        elif self.notification_type == 'new_message':
+            if self.related_message:
+                return reverse('message_chat:chat_detail', kwargs={'username': self.related_user.username})
+            return reverse('message_chat:chat_list')
             
         return reverse('core:dashboard')

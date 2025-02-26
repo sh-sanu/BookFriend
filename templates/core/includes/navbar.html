@@ -45,8 +45,11 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'message_chat:chat_list' %}">
+              <a class="nav-link position-relative" href="{% url 'message_chat:chat_list' %}">
                 <i class="bi bi-chat-dots me-1"></i> Messages
+                <span id="message-unread-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                  0
+                </span>
               </a>
             </li>
             <li class="nav-item">
